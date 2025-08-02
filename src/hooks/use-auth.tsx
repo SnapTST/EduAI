@@ -11,8 +11,9 @@ import {
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useRouter } from 'next/navigation';
 
-// Mock user data structure
+// User data structure
 interface User {
+  username: string;
   displayName: string;
   email: string;
   photoURL?: string;
@@ -21,20 +22,23 @@ interface User {
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (email: string, pass: string) => boolean;
+  login: (username: string, pass: string) => boolean;
+  register: (email: string, username: string, pass: string) => boolean;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// A mock user for demonstration purposes
+// A mock user for demonstration purposes if no one has registered
 const MOCK_USER: User = {
+    username: 'alex',
     displayName: 'Alex',
     email: 'student@example.com',
     photoURL: 'https://placehold.co/100x100.png'
 }
 const MOCK_PASSWORD = 'password';
 const AUTH_KEY = 'eduai-scholar-auth';
+const REGISTERED_USER_KEY = 'eduai-scholar-registered-user';
 
 
 export const AuthProvider = ({children}: {children: ReactNode}) => {
@@ -49,7 +53,13 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
         try {
             const authData = JSON.parse(storedAuth);
             if (authData.isAuthenticated) {
-                setUser(MOCK_USER);
+                const storedUser = localStorage.getItem(REGISTERED_USER_KEY);
+                if (storedUser) {
+                  setUser(JSON.parse(storedUser));
+                } else {
+                  // Fallback to mock user if something is wrong
+                  setUser(MOCK_USER);
+                }
             }
         } catch (e) {
             console.error("Failed to parse auth data", e);
@@ -59,13 +69,48 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
     setLoading(false);
   }, []);
 
-  const login = (email: string, pass: string): boolean => {
-    if (email.toLowerCase() === MOCK_USER.email && pass === MOCK_PASSWORD) {
-        setUser(MOCK_USER);
+  const login = (username: string, pass: string): boolean => {
+    const storedUserRaw = localStorage.getItem(REGISTERED_USER_KEY);
+    
+    // Check against registered user first
+    if(storedUserRaw) {
+      const storedUser = JSON.parse(storedUserRaw);
+      if (username === storedUser.username && pass === storedUser.password) {
+        setUser(storedUser.user);
         localStorage.setItem(AUTH_KEY, JSON.stringify({ isAuthenticated: true }));
         return true;
+      }
     }
+
+    // Fallback to default mock user
+    if (username.toLowerCase() === MOCK_USER.username && pass === MOCK_PASSWORD) {
+        setUser(MOCK_USER);
+        localStorage.setItem(AUTH_KEY, JSON.stringify({ isAuthenticated: true }));
+        // Also save the mock user as the "registered" user for consistency
+        localStorage.setItem(REGISTERED_USER_KEY, JSON.stringify({ user: MOCK_USER, password: MOCK_PASSWORD }));
+        return true;
+    }
+
     return false;
+  };
+
+  const register = (email: string, username: string, pass: string): boolean => {
+    // In a real app, you'd check if the username or email is already taken.
+    // Here we just overwrite any existing registered user for simplicity.
+    const newUser: User = {
+      email,
+      username,
+      displayName: username,
+      photoURL: `https://placehold.co/100x100.png?text=${username.charAt(0).toUpperCase()}`
+    };
+
+    localStorage.setItem(REGISTERED_USER_KEY, JSON.stringify({ user: newUser, password: pass }));
+    
+    // Automatically log in the user after registration
+    setUser(newUser);
+    localStorage.setItem(AUTH_KEY, JSON.stringify({ isAuthenticated: true }));
+
+    return true;
   };
 
   const logout = () => {
@@ -83,7 +128,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   }
 
   return (
-    <AuthContext.Provider value={{user, loading, login, logout}}>
+    <AuthContext.Provider value={{user, loading, login, register, logout}}>
       {children}
     </AuthContext.Provider>
   );
