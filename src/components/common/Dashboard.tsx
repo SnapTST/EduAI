@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic, Gamepad2, ClipboardList, Bookmark, Trash2 } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic, Gamepad2, ClipboardList, Bookmark, Trash2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { useSavedContent } from '@/hooks/use-saved-content';
 import type { SavedContent } from '@/hooks/use-saved-content';
@@ -120,6 +120,13 @@ const tools = [
     href: '/revision-sheet-maker',
     icon: <ClipboardList className="h-8 w-8 text-primary" />,
     cta: 'Create a Sheet',
+  },
+  {
+    title: 'Community Notes',
+    description: 'Share your notes with the community and browse materials uploaded by other students.',
+    href: '/community-notes',
+    icon: <Users className="h-8 w-8 text-primary" />,
+    cta: 'View Community Notes',
   }
 ];
 
