@@ -9,3 +9,4 @@ import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/check-assignment.ts';
 import '@/ai/flows/generate-flashcards.ts';
 import '@/ai/flows/generate-study-plan.ts';
+import '@/ai/flows/explain-topic.ts';

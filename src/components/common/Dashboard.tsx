@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion } from 'lucide-react';
 import Link from 'next/link';
 
 const tools = [
@@ -75,6 +75,13 @@ const tools = [
     href: '/study-planner',
     icon: <CalendarDays className="h-8 w-8 text-primary" />,
     cta: 'Create a Plan',
+  },
+  {
+    title: 'AI Explainer Bot',
+    description: 'Ask any question and get clear, simple explanations with examples to help you understand tough topics.',
+    href: '/explainer-bot',
+    icon: <MessageCircleQuestion className="h-8 w-8 text-primary" />,
+    cta: 'Ask a Question',
   }
 ];
 
