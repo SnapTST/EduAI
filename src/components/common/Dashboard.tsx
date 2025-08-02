@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays } from 'lucide-react';
 import Link from 'next/link';
 
 const tools = [
@@ -68,6 +68,13 @@ const tools = [
     href: '/handwriting-to-notes',
     icon: <Edit className="h-8 w-8 text-primary" />,
     cta: 'Convert to Text',
+  },
+  {
+    title: 'Study Planner',
+    description: 'Generate a custom study plan based on your goals and timeline to stay organized and focused.',
+    href: '/study-planner',
+    icon: <CalendarDays className="h-8 w-8 text-primary" />,
+    cta: 'Create a Plan',
   }
 ];
 

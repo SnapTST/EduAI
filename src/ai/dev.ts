@@ -8,3 +8,4 @@ import '@/ai/flows/generate-notes-from-youtube.ts';
 import '@/ai/flows/text-to-speech.ts';
 import '@/ai/flows/check-assignment.ts';
 import '@/ai/flows/generate-flashcards.ts';
+import '@/ai/flows/generate-study-plan.ts';
