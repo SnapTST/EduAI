@@ -37,7 +37,7 @@ function FlashcardViewer({ flashcards }: { flashcards: Flashcard[] }) {
           <div
             className={cn(
               "absolute w-full h-full transition-transform duration-700 transform-style-preserve-3d rounded-lg shadow-lg cursor-pointer",
-              { "rotate-y-188": flippedStates[index] }
+              { "rotate-y-180": flippedStates[index] }
             )}
             style={{ transform: flippedStates[index] ? 'rotateY(180deg)' : 'rotateY(0deg)' }}
           >
