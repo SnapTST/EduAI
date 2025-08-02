@@ -107,7 +107,7 @@ const tools = [
   },
   {
     title: 'Revision Sheet Maker',
-    description: 'Automatically condense all your AI-generated content into a single, powerful revision sheet.',
+    description: 'Paste your notes and content to condense them into a single, powerful revision sheet.',
     href: '/revision-sheet-maker',
     icon: <ClipboardList className="h-8 w-8 text-primary" />,
     cta: 'Create a Sheet',
