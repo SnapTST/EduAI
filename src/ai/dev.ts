@@ -10,3 +10,4 @@ import '@/ai/flows/check-assignment.ts';
 import '@/ai/flows/generate-flashcards.ts';
 import '@/ai/flows/generate-study-plan.ts';
 import '@/ai/flows/explain-topic.ts';
+import '@/ai/flows/analyze-past-paper.ts';

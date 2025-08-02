@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck } from 'lucide-react';
 import Link from 'next/link';
 
 const tools = [
@@ -82,6 +82,13 @@ const tools = [
     href: '/explainer-bot',
     icon: <MessageCircleQuestion className="h-8 w-8 text-primary" />,
     cta: 'Ask a Question',
+  },
+  {
+    title: 'Past Paper Analyzer',
+    description: 'Upload past papers to detect repeated questions and identify key topics to focus on for your exams.',
+    href: '/past-paper-analyzer',
+    icon: <ClipboardCheck className="h-8 w-8 text-primary" />,
+    cta: 'Analyze Paper',
   }
 ];
 
