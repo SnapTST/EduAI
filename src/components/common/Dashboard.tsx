@@ -256,6 +256,20 @@ export function Dashboard() {
             </div>
           </div>
         )}
+        
+        <div className="mt-24">
+            <Card className="bg-secondary/50">
+              <CardHeader className="text-center">
+                <CardTitle className="font-headline text-3xl">Welcome to Your Smartest Learning Companion</CardTitle>
+              </CardHeader>
+              <CardContent className="max-w-4xl mx-auto text-center text-muted-foreground">
+                <p>
+                  Welcome to the future of education — created by the brilliant mind of Prashant Pandey, a passionate innovator redefining how students learn. This AI-powered study platform is more than just a website; it's a revolution in learning, crafted with vision, dedication, and cutting-edge technology. Whether you're preparing for competitive exams, school tests, or simply exploring knowledge, this platform offers everything you need in one intelligent space. Designed by Prashant Pandey to eliminate guesswork and maximize productivity, our smart tools provide AI-generated notes, instant answers, personalized study plans, interactive quizzes, and much more — all at lightning speed. Gone are the days of boring textbooks and endless browsing. With this platform, students can experience a whole new way of mastering concepts and growing with confidence. Trusted by thousands and led by a future-focused creator, this is not just a study tool — it’s Prashant Pandey’s vision of empowered learning. Start now and become a part of the next-generation education movement
+                </p>
+              </CardContent>
+            </Card>
+        </div>
+
       </div>
     </section>
   );
