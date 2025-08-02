@@ -56,22 +56,42 @@ export default function RevisionSheetMakerTool() {
   };
 
   const handleSave = () => {
-    const success = saveContent({
+    if (!revisionSheet) return;
+    saveContent({
       title: `Revision Sheet`,
       tool: 'Revision Sheet Maker',
       content: revisionSheet,
     });
     toast({
-      title: success ? 'Sheet Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your revision sheet has been saved to the dashboard.'
-        : 'There was an issue saving your sheet.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Sheet Saved!',
+      description: 'Your revision sheet has been saved to the dashboard.',
     });
   };
 
-  const handleShare = () => {
-    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
+  const handleShare = async () => {
+    if (!revisionSheet) return;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Revision Sheet from EduAI Scholar',
+          text: revisionSheet,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(revisionSheet);
+        toast({
+          title: 'Copied to Clipboard!',
+          description: 'Sheet copied. You can now paste it to share.',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: 'Sharing Failed',
+        description: 'Could not share the sheet.',
+        variant: 'destructive',
+      });
+    }
   }
 
   return (

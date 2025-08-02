@@ -56,23 +56,43 @@ export default function QuizGeneratorTool() {
   };
   
   const handleSave = () => {
-    const success = saveContent({
+    if (!quiz) return;
+    saveContent({
       title: `Quiz: ${studyMaterial.substring(0, 30)}...`,
       tool: 'Quiz Generator',
       content: quiz,
     });
     toast({
-      title: success ? 'Content Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your quiz has been saved to the dashboard.'
-        : 'There was an issue saving your content.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Content Saved!',
+      description: 'Your quiz has been saved to the dashboard.',
     });
   };
 
-  const handleShare = () => {
-    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
-  }
+  const handleShare = async () => {
+    if (!quiz) return;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Quiz from EduAI Scholar`,
+          text: quiz,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(quiz);
+        toast({
+          title: 'Copied to Clipboard!',
+          description: 'Quiz copied. You can now paste it to share.',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: 'Sharing Failed',
+        description: 'Could not share the quiz.',
+        variant: 'destructive',
+      });
+    }
+  };
 
 
   return (

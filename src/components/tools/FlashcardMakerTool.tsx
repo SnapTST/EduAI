@@ -106,27 +106,48 @@ export default function FlashcardMakerTool() {
   };
 
   const handleSave = () => {
+    if (flashcards.length === 0) return;
     const flashcardsText = flashcards
       .map(card => `Q: ${card.front}\nA: ${card.back}`)
       .join('\n\n---\n\n');
 
-    const success = saveContent({
+    saveContent({
       title: `Flashcards: ${studyMaterial.substring(0, 30)}...`,
       tool: 'AI Flashcard Maker',
       content: flashcardsText,
     });
 
     toast({
-      title: success ? 'Flashcards Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your flashcards have been saved to the dashboard.'
-        : 'There was an issue saving your flashcards.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Flashcards Saved!',
+      description: 'Your flashcards have been saved to the dashboard.',
     });
   };
 
-  const handleShare = () => {
-    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
+  const handleShare = async () => {
+    if (flashcards.length === 0) return;
+    const shareText = `Check out these flashcards I made with EduAI Scholar:\n\n${flashcards.map(c => `${c.front} - ${c.back}`).join('\n')}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Flashcards from EduAI Scholar',
+          text: shareText,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        toast({
+          title: 'Copied to Clipboard!',
+          description: 'Flashcards copied. You can now paste them to share.',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: 'Sharing Failed',
+        description: 'Could not share the flashcards.',
+        variant: 'destructive',
+      });
+    }
   }
 
   return (

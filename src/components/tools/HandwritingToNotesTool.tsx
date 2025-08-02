@@ -89,23 +89,43 @@ export default function HandwritingToNotesTool() {
   };
 
   const handleSave = () => {
-    const success = saveContent({
+    if (!extractedText) return;
+    saveContent({
       title: `Notes from Handwriting`,
       tool: 'Handwriting to Notes',
       content: extractedText,
     });
     toast({
-      title: success ? 'Notes Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your notes have been saved to the dashboard.'
-        : 'There was an issue saving your notes.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Notes Saved!',
+      description: 'Your notes have been saved to the dashboard.',
     });
   };
 
-  const handleShare = () => {
-    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
-  }
+  const handleShare = async () => {
+    if (!extractedText) return;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Notes from EduAI Scholar',
+          text: extractedText,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(extractedText);
+        toast({
+          title: 'Copied to Clipboard!',
+          description: 'Notes copied. You can now paste them to share.',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: 'Sharing Failed',
+        description: 'Could not share the notes.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
     <div className="space-y-8">

@@ -88,23 +88,44 @@ export default function ExamBuilderTool() {
   };
   
   const handleSave = () => {
-    const success = saveContent({
+    if (examQuestions.length === 0) return;
+    saveContent({
       title: `Exam Questions from Image`,
       tool: 'Exam Builder',
       content: examQuestions.join('\n\n'),
     });
     toast({
-      title: success ? 'Content Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your exam questions have been saved to the dashboard.'
-        : 'There was an issue saving your content.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Content Saved!',
+      description: 'Your exam questions have been saved to the dashboard.',
     });
   };
 
-  const handleShare = () => {
-    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
-  }
+  const handleShare = async () => {
+    if (examQuestions.length === 0) return;
+    const shareText = `Check out these exam questions I generated with EduAI Scholar:\n\n${examQuestions.join('\n\n')}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Exam Questions from EduAI Scholar',
+          text: shareText,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        toast({
+          title: 'Copied to Clipboard!',
+          description: 'Questions copied. You can now paste them to share.',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: 'Sharing Failed',
+        description: 'Could not share the questions.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
     <div className="space-y-8">

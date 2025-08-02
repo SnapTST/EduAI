@@ -56,22 +56,42 @@ export default function SummarizerTool() {
   };
 
   const handleSave = () => {
-    const success = saveContent({
+    if (!summary) return;
+    saveContent({
       title: `Summary: ${content.substring(0, 30)}...`,
       tool: 'AI Summarizer',
       content: summary,
     });
     toast({
-      title: success ? 'Content Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your summary has been saved to the dashboard.'
-        : 'There was an issue saving your content.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Content Saved!',
+      description: 'Your summary has been saved to the dashboard.',
     });
   };
 
-  const handleShare = () => {
-    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
+  const handleShare = async () => {
+    if (!summary) return;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Summary from EduAI Scholar',
+          text: summary,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(summary);
+        toast({
+          title: 'Copied to Clipboard!',
+          description: 'Summary copied. You can now paste it to share.',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: 'Sharing Failed',
+        description: 'Could not share the summary.',
+        variant: 'destructive',
+      });
+    }
   }
 
   return (

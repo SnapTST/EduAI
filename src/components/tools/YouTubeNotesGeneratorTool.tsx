@@ -57,38 +57,59 @@ export default function YouTubeNotesGeneratorTool() {
 
   const handleSaveNotes = () => {
     if (!generatedContent) return;
-    const success = saveContent({
+    saveContent({
       title: `Notes for ${videoUrl}`,
       tool: 'YouTube Notes Generator',
       content: generatedContent.notes,
     });
     toast({
-      title: success ? 'Notes Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your notes have been saved to the dashboard.'
-        : 'There was an issue saving your notes.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Notes Saved!',
+      description: 'Your notes have been saved to the dashboard.',
     });
   };
 
   const handleSaveQuiz = () => {
     if (!generatedContent || !generatedContent.quiz) return;
-    const success = saveContent({
+    saveContent({
       title: `Quiz for ${videoUrl}`,
       tool: 'YouTube Notes Generator',
       content: generatedContent.quiz,
     });
     toast({
-      title: success ? 'Quiz Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your quiz has been saved to the dashboard.'
-        : 'There was an issue saving your quiz.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Quiz Saved!',
+      description: 'Your quiz has been saved to the dashboard.',
     });
   };
 
-  const handleShare = () => {
-    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
+  const handleShare = async (contentType: 'notes' | 'quiz') => {
+    if (!generatedContent) return;
+    const contentToShare = contentType === 'notes' ? generatedContent.notes : generatedContent.quiz;
+    const title = contentType === 'notes' ? `Notes for ${videoUrl}` : `Quiz for ${videoUrl}`;
+
+    if (!contentToShare) return;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${title} from EduAI Scholar`,
+          text: contentToShare,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(contentToShare);
+        toast({
+          title: 'Copied to Clipboard!',
+          description: `The ${contentType} have been copied.`,
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: 'Sharing Failed',
+        description: `Could not share the ${contentType}.`,
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -151,7 +172,7 @@ export default function YouTubeNotesGeneratorTool() {
               <Button variant="outline" onClick={handleSaveNotes}>
                 <Save className="mr-2 h-4 w-4" /> Save Notes
               </Button>
-              <Button variant="outline" onClick={handleShare}>
+              <Button variant="outline" onClick={() => handleShare('notes')}>
                 <Share2 className="mr-2 h-4 w-4" /> Share Notes
               </Button>
             </CardFooter>
@@ -174,7 +195,7 @@ export default function YouTubeNotesGeneratorTool() {
                 <Button variant="outline" onClick={handleSaveQuiz}>
                   <Save className="mr-2 h-4 w-4" /> Save Quiz
                 </Button>
-                <Button variant="outline" onClick={handleShare}>
+                <Button variant="outline" onClick={() => handleShare('quiz')}>
                   <Share2 className="mr-2 h-4 w-4" /> Share Quiz
                 </Button>
               </CardFooter>

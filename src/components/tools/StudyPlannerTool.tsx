@@ -62,22 +62,41 @@ export default function StudyPlannerTool() {
 
   const handleSave = () => {
     if (!plan) return;
-    const success = saveContent({
+    saveContent({
       title: `Study Plan for ${subject}`,
       tool: 'Study Planner',
       content: plan,
     });
     toast({
-      title: success ? 'Plan Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your study plan has been saved to the dashboard.'
-        : 'There was an issue saving your plan.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Plan Saved!',
+      description: 'Your study plan has been saved to the dashboard.',
     });
   };
 
-  const handleShare = () => {
-    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
+  const handleShare = async () => {
+    if (!plan) return;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `Study Plan for ${subject} from EduAI Scholar`,
+          text: plan,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(plan);
+        toast({
+          title: 'Copied to Clipboard!',
+          description: 'Plan copied. You can now paste it to share.',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: 'Sharing Failed',
+        description: 'Could not share the plan.',
+        variant: 'destructive',
+      });
+    }
   }
 
   return (

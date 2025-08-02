@@ -33,7 +33,6 @@ export default function CommunityNotesTool() {
   const [description, setDescription] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   
   const [notes, setNotes] = useState<CommunityNote[]>([]);
@@ -233,7 +232,7 @@ export default function CommunityNotesTool() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isUploading || isLoading || !user}>
+            <Button type="submit" disabled={isUploading || !user || !title.trim() || !description.trim() || !imageFile}>
               {isUploading && <LoadingSpinner className="mr-2" />}
               {isUploading ? 'Sharing...' : 'Share with Community'}
             </Button>

@@ -89,23 +89,43 @@ export default function PastPaperAnalyzerTool() {
 
   const handleSave = () => {
     if (!result) return;
-    const fullContent = `## Analysis\n\n${result.analysis}\n\n## Focus Areas\n\n${result.focusAreas.join('\n- ')}`;
-    const success = saveContent({
+    const fullContent = `## Analysis\n\n${result.analysis}\n\n## Focus Areas\n\n- ${result.focusAreas.join('\n- ')}`;
+    saveContent({
       title: `Past Paper Analysis`,
       tool: 'Past Paper Analyzer',
       content: fullContent,
     });
     toast({
-      title: success ? 'Analysis Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your paper analysis has been saved to the dashboard.'
-        : 'There was an issue saving your analysis.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Analysis Saved!',
+      description: 'Your paper analysis has been saved to the dashboard.',
     });
   };
 
-  const handleShare = () => {
-    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
+  const handleShare = async () => {
+    if (!result) return;
+    const shareText = `Past Paper Analysis from EduAI Scholar:\n\nAnalysis:\n${result.analysis}\n\nFocus Areas:\n- ${result.focusAreas.join('\n- ')}`;
+     try {
+      if (navigator.share) {
+        await navigator.share({
+          title: 'Past Paper Analysis from EduAI Scholar',
+          text: shareText,
+          url: window.location.href,
+        });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+        toast({
+          title: 'Copied to Clipboard!',
+          description: 'Analysis copied. You can now paste it to share.',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: 'Sharing Failed',
+        description: 'Could not share the analysis.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (

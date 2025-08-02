@@ -14,6 +14,7 @@ import {
   doc,
   Timestamp,
 } from 'firebase/firestore';
+import { useToast } from './use-toast';
 
 export interface SavedContent {
   id: string; // Firestore document ID
@@ -34,6 +35,7 @@ export function useSavedContent() {
   const [savedContents, setSavedContents] = useState<SavedContent[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [user, setUser] = useState(auth.currentUser);
+  const { toast } = useToast();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((newUser) => {
@@ -64,10 +66,15 @@ export function useSavedContent() {
       setSavedContents(contents);
     } catch (error) {
       console.error('Failed to load saved content from Firestore', error);
+      toast({
+        title: 'Error Loading Content',
+        description: 'Could not fetch your saved content.',
+        variant: 'destructive',
+      });
     } finally {
       setIsLoaded(true);
     }
-  }, [user]);
+  }, [user, toast]);
 
   useEffect(() => {
     fetchSavedContent();
@@ -76,8 +83,12 @@ export function useSavedContent() {
   const saveContent = useCallback(
     async (content: NewSavedContent) => {
       if (!user) {
-        console.error('User not logged in, cannot save content.');
-        return false;
+        toast({
+          title: 'Not Signed In',
+          description: 'You must be signed in to save content.',
+          variant: 'destructive',
+        });
+        return;
       }
       try {
         await addDoc(collection(db, 'savedContent'), {
@@ -86,13 +97,16 @@ export function useSavedContent() {
           timestamp: Timestamp.now(),
         });
         fetchSavedContent(); // Re-fetch to update the list
-        return true;
       } catch (error) {
         console.error('Failed to save content to Firestore', error);
-        return false;
+         toast({
+          title: 'Failed to Save',
+          description: 'There was an issue saving your content.',
+          variant: 'destructive',
+        });
       }
     },
-    [user, fetchSavedContent]
+    [user, fetchSavedContent, toast]
   );
 
   const deleteContent = useCallback(
@@ -100,11 +114,19 @@ export function useSavedContent() {
       try {
         await deleteDoc(doc(db, 'savedContent', id));
         fetchSavedContent(); // Re-fetch to update the list
+         toast({
+          title: 'Content Deleted',
+        });
       } catch (error) {
         console.error('Failed to delete content from Firestore', error);
+         toast({
+          title: 'Deletion Failed',
+          description: 'Could not delete the content.',
+          variant: 'destructive',
+        });
       }
     },
-    [fetchSavedContent]
+    [fetchSavedContent, toast]
   );
 
   return { savedContents, saveContent, deleteContent, isLoaded };

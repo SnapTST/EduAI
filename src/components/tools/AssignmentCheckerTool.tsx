@@ -58,23 +58,43 @@ export default function AssignmentCheckerTool() {
   const handleSave = () => {
     if (!result) return;
     const fullContent = `## Evaluation\n\n${result.evaluation}\n\n## Suggestions\n\n${result.suggestions}`;
-    const success = saveContent({
+    saveContent({
       title: `Assignment Feedback: ${assignmentText.substring(0, 30)}...`,
       tool: 'Assignment Checker',
       content: fullContent,
     });
     toast({
-      title: success ? 'Feedback Saved!' : 'Failed to Save',
-      description: success
-        ? 'Your assignment feedback has been saved to the dashboard.'
-        : 'There was an issue saving your feedback.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Feedback Saved!',
+      description: 'Your assignment feedback has been saved to the dashboard.',
     });
   };
 
-  const handleShare = () => {
-    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
-  }
+  const handleShare = async () => {
+    if (!result) return;
+    const shareData = {
+      title: 'Assignment Feedback from EduAI Scholar',
+      text: `Here's the feedback on my assignment:\n\nEvaluation:\n${result.evaluation}\n\nSuggestions:\n${result.suggestions}`,
+      url: window.location.href,
+    };
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+      } else {
+        await navigator.clipboard.writeText(shareData.text);
+        toast({
+          title: 'Copied to Clipboard!',
+          description: 'Feedback copied. You can now paste it to share.',
+        });
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast({
+        title: 'Sharing Failed',
+        description: 'Could not share the feedback.',
+        variant: 'destructive',
+      });
+    }
+  };
 
   return (
     <div className="space-y-8">
