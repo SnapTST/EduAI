@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -7,52 +8,70 @@ import {
   useContext,
   ReactNode,
 } from 'react';
-import {
-  onAuthStateChanged,
-  GoogleAuthProvider,
-  signInWithPopup,
-  signOut,
-  User,
-} from 'firebase/auth';
-import {auth} from '@/lib/firebase';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
+import { useRouter } from 'next/navigation';
+
+// Mock user data structure
+interface User {
+  displayName: string;
+  email: string;
+  photoURL?: string;
+}
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
-  logout: () => Promise<void>;
+  login: (email: string, pass: string) => boolean;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// A mock user for demonstration purposes
+const MOCK_USER: User = {
+    displayName: 'Alex',
+    email: 'student@example.com',
+    photoURL: 'https://placehold.co/100x100.png'
+}
+const MOCK_PASSWORD = 'password';
+const AUTH_KEY = 'eduai-scholar-auth';
+
+
 export const AuthProvider = ({children}: {children: ReactNode}) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-    });
-    return () => unsubscribe();
+    // Check if the user is "logged in" from a previous session
+    const storedAuth = localStorage.getItem(AUTH_KEY);
+    if (storedAuth) {
+        try {
+            const authData = JSON.parse(storedAuth);
+            if (authData.isAuthenticated) {
+                setUser(MOCK_USER);
+            }
+        } catch (e) {
+            console.error("Failed to parse auth data", e);
+            localStorage.removeItem(AUTH_KEY);
+        }
+    }
+    setLoading(false);
   }, []);
 
-  const signInWithGoogle = async () => {
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-    } catch (error) {
-      console.error('Error signing in with Google', error);
+  const login = (email: string, pass: string): boolean => {
+    if (email.toLowerCase() === MOCK_USER.email && pass === MOCK_PASSWORD) {
+        setUser(MOCK_USER);
+        localStorage.setItem(AUTH_KEY, JSON.stringify({ isAuthenticated: true }));
+        return true;
     }
+    return false;
   };
 
-  const logout = async () => {
-    try {
-      await signOut(auth);
-    } catch (error) {
-      console.error('Error signing out', error);
-    }
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem(AUTH_KEY);
+    router.push('/login');
   };
 
   if (loading) {
@@ -64,7 +83,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   }
 
   return (
-    <AuthContext.Provider value={{user, loading, signInWithGoogle, logout}}>
+    <AuthContext.Provider value={{user, loading, login, logout}}>
       {children}
     </AuthContext.Provider>
   );

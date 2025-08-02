@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,9 +14,10 @@ import {
 import { LogOut, User } from 'lucide-react';
 import { Logo } from './Logo';
 import { useAuth } from '@/hooks/use-auth';
+import Link from 'next/link';
 
 export function Header() {
-  const { user, signInWithGoogle, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   return (
     <header className="bg-card/80 backdrop-blur-sm border-b sticky top-0 z-40">
@@ -51,7 +53,9 @@ export function Header() {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button onClick={signInWithGoogle}>Sign in with Google</Button>
+          <Button asChild>
+            <Link href="/login">Sign In</Link>
+          </Button>
         )}
       </div>
     </header>
