@@ -12,3 +12,4 @@ import '@/ai/flows/generate-study-plan.ts';
 import '@/ai/flows/explain-topic.ts';
 import '@/ai/flows/analyze-past-paper.ts';
 import '@/ai/flows/transcribe-and-summarize.ts';
+import '@/ai/flows/parse-mcq-quiz.ts';
