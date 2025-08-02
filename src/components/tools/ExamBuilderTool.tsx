@@ -9,8 +9,10 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Save, Share2, UploadCloud, Image as ImageIcon, X } from 'lucide-react';
 import Image from 'next/image';
 import { Label } from '../ui/label';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function ExamBuilderTool() {
+  const { user } = useAuth();
   const [photoDataUri, setPhotoDataUri] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [examQuestions, setExamQuestions] = useState<string[]>([]);
@@ -57,6 +59,14 @@ export default function ExamBuilderTool() {
       });
       return;
     }
+    if (!user) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to build an exam.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setIsLoading(true);
     setExamQuestions([]);
     try {
@@ -73,6 +83,18 @@ export default function ExamBuilderTool() {
       setIsLoading(false);
     }
   };
+  
+  const handleSaveToDrive = () => {
+    toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
+  }
+  
+  const handleSaveToTerabox = () => {
+    toast({ title: "Coming Soon!", description: "TeraBox integration is under development." });
+  }
+
+  const handleShare = () => {
+    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
+  }
 
   return (
     <div className="space-y-8">
@@ -107,7 +129,7 @@ export default function ExamBuilderTool() {
                     accept="image/*"
                     onChange={handleFileChange}
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                    disabled={isLoading}
+                    disabled={isLoading || !user}
                   />
                 </>
               )}
@@ -138,10 +160,15 @@ export default function ExamBuilderTool() {
                     <ImageIcon className="w-4 h-4"/> Image successfully uploaded and ready.
                 </p>
             )}
+             {!user && (
+              <p className="text-sm text-center text-destructive">
+                Please sign in to upload an image and build an exam.
+              </p>
+            )}
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleSubmit} disabled={isLoading || !photoDataUri}>
+          <Button onClick={handleSubmit} disabled={isLoading || !photoDataUri || !user}>
             {isLoading && <LoadingSpinner className="mr-2" />}
             {isLoading ? 'Building Exam...' : 'Generate Exam Questions'}
           </Button>
@@ -164,13 +191,13 @@ export default function ExamBuilderTool() {
             </ul>
           </CardContent>
           <CardFooter className="gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleSaveToDrive}>
               <Save className="mr-2 h-4 w-4" /> Save to Google Drive
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleSaveToTerabox}>
                 <ImageIcon className="mr-2 h-4 w-4" /> Save Image to TeraBox
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share
             </Button>
           </CardFooter>

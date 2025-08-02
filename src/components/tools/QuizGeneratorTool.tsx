@@ -9,8 +9,10 @@ import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Save, Share2 } from 'lucide-react';
 import { Label } from '../ui/label';
+import { useAuth } from '@/hooks/use-auth';
 
 export default function QuizGeneratorTool() {
+  const { user } = useAuth();
   const [studyMaterial, setStudyMaterial] = useState('');
   const [quiz, setQuiz] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +23,14 @@ export default function QuizGeneratorTool() {
       toast({
         title: 'Input Required',
         description: 'Please provide some study material to generate a quiz.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (!user) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in to generate a quiz.',
         variant: 'destructive',
       });
       return;
@@ -41,6 +51,15 @@ export default function QuizGeneratorTool() {
       setIsLoading(false);
     }
   };
+  
+  const handleSaveToDrive = () => {
+    toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
+  }
+
+  const handleShare = () => {
+    toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
+  }
+
 
   return (
     <div className="space-y-8">
@@ -64,12 +83,17 @@ export default function QuizGeneratorTool() {
               value={studyMaterial}
               onChange={(e) => setStudyMaterial(e.target.value)}
               className="min-h-[200px] text-base"
-              disabled={isLoading}
+              disabled={isLoading || !user}
             />
+             {!user && (
+              <p className="text-sm text-center text-destructive">
+                Please sign in to generate a quiz.
+              </p>
+            )}
           </div>
         </CardContent>
         <CardFooter>
-          <Button onClick={handleSubmit} disabled={isLoading || !studyMaterial.trim()}>
+          <Button onClick={handleSubmit} disabled={isLoading || !studyMaterial.trim() || !user}>
             {isLoading && <LoadingSpinner className="mr-2" />}
             {isLoading ? 'Generating Quiz...' : 'Generate Quiz'}
           </Button>
@@ -90,10 +114,10 @@ export default function QuizGeneratorTool() {
             </div>
           </CardContent>
           <CardFooter className="gap-2">
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleSaveToDrive}>
               <Save className="mr-2 h-4 w-4" /> Save to Google Drive
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share
             </Button>
           </CardFooter>
