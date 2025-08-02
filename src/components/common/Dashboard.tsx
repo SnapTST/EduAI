@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText } from 'lucide-react';
 import Link from 'next/link';
 
 const tools = [
@@ -54,6 +54,13 @@ const tools = [
     href: '/assignment-checker',
     icon: <CheckSquare className="h-8 w-8 text-primary" />,
     cta: 'Check Assignment',
+  },
+  {
+    title: 'AI Flashcard Maker',
+    description: 'Automatically turn your notes and study material into interactive flashcards for effective revision.',
+    href: '/flashcard-maker',
+    icon: <FileText className="h-8 w-8 text-primary" />,
+    cta: 'Create Flashcards',
   }
 ];
 
