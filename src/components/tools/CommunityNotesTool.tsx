@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { UploadCloud, Image as ImageIcon, Users } from 'lucide-react';
+import { UploadCloud, Image as ImageIcon, Users, FileText, X } from 'lucide-react';
 import Image from 'next/image';
 import { Label } from '../ui/label';
 import { useAuth } from '@/hooks/use-auth';
@@ -21,18 +21,24 @@ interface CommunityNote {
   id: string;
   title: string;
   description: string;
-  imageUrl: string;
+  fileUrls: string[];
+  fileTypes: string[];
   authorName: string;
   authorPhotoUrl: string;
   timestamp: Timestamp;
+}
+
+interface FilePreview {
+  file: File;
+  previewUrl: string;
 }
 
 export default function CommunityNotesTool() {
   const { user } = useAuth();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<FilePreview[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   
   const [notes, setNotes] = useState<CommunityNote[]>([]);
@@ -41,24 +47,23 @@ export default function CommunityNotesTool() {
   const { toast } = useToast();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit for storage
-        toast({
-          title: 'File too large',
-          description: 'Please upload an image smaller than 5MB.',
-          variant: 'destructive',
-        });
-        return;
-      }
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onload = (loadEvent) => {
-        setImagePreview(loadEvent.target?.result as string);
-      };
-      reader.readAsDataURL(file);
+    const selectedFiles = e.target.files;
+    if (selectedFiles && selectedFiles.length > 0) {
+      const newFiles = Array.from(selectedFiles);
+      setFiles(prev => [...prev, ...newFiles]);
+
+      const newPreviews = newFiles.map(file => {
+        return { file, previewUrl: URL.createObjectURL(file) };
+      });
+      setPreviews(prev => [...prev, ...newPreviews]);
     }
   };
+  
+  const removeFile = (fileToRemove: File) => {
+    setFiles(prev => prev.filter(file => file !== fileToRemove));
+    setPreviews(prev => prev.filter(p => p.file !== fileToRemove));
+  };
+
 
   const fetchNotes = useCallback(async () => {
     setIsLoadingNotes(true);
@@ -88,10 +93,10 @@ export default function CommunityNotesTool() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title.trim() || !description.trim() || !imageFile) {
+    if (!title.trim() || !description.trim() || files.length === 0) {
       toast({
         title: 'All Fields Required',
-        description: 'Please provide a title, description, and an image.',
+        description: 'Please provide a title, description, and at least one file.',
         variant: 'destructive',
       });
       return;
@@ -107,16 +112,21 @@ export default function CommunityNotesTool() {
     
     setIsUploading(true);
     try {
-      // 1. Upload image to Firebase Storage
-      const storageRef = ref(storage, `community-notes/${Date.now()}_${imageFile.name}`);
-      const snapshot = await uploadBytes(storageRef, imageFile);
-      const imageUrl = await getDownloadURL(snapshot.ref);
+      // 1. Upload files to Firebase Storage
+      const uploadPromises = files.map(file => {
+        const storageRef = ref(storage, `community-notes/${Date.now()}_${file.name}`);
+        return uploadBytes(storageRef, file).then(snapshot => getDownloadURL(snapshot.ref));
+      });
+
+      const fileUrls = await Promise.all(uploadPromises);
+      const fileTypes = files.map(file => file.type);
 
       // 2. Add note metadata to Firestore
       await addDoc(collection(db, 'communityNotes'), {
         title,
         description,
-        imageUrl,
+        fileUrls,
+        fileTypes,
         authorId: user.uid,
         authorName: user.displayName || 'Anonymous',
         authorPhotoUrl: user.photoURL || '',
@@ -131,8 +141,8 @@ export default function CommunityNotesTool() {
       // Reset form
       setTitle('');
       setDescription('');
-      setImageFile(null);
-      setImagePreview(null);
+      setFiles([]);
+      setPreviews([]);
       
       // Refresh notes
       fetchNotes();
@@ -164,7 +174,7 @@ export default function CommunityNotesTool() {
           <CardHeader>
             <CardTitle>Share Your Notes</CardTitle>
             <CardDescription>
-              Upload an image of your notes along with a title and description.
+              Upload images or PDFs of your notes along with a title and description.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -192,39 +202,61 @@ export default function CommunityNotesTool() {
             </div>
 
             <div>
-              <Label htmlFor="image-upload">Note Image</Label>
-              <div className="mt-2 relative border-2 border-dashed border-muted-foreground/50 rounded-lg p-6 flex flex-col items-center justify-center text-center h-64">
-                {!imagePreview && (
-                  <>
-                    <UploadCloud className="w-12 h-12 text-muted-foreground" />
-                    <p className="mt-4 text-muted-foreground">
-                      Drag & drop an image here, or click to select a file
-                    </p>
-                    <p className="text-xs text-muted-foreground/80 mt-1">Max file size: 5MB</p>
-                    <input
-                      id="image-upload"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                      disabled={isUploading || !user}
-                      required
-                    />
-                  </>
-                )}
-                {imagePreview && (
-                  <div className="relative w-full h-full">
-                    <Image
-                      src={imagePreview}
-                      alt="Uploaded notes preview"
-                      fill
-                      style={{ objectFit: 'contain' }}
-                      className="rounded-md"
-                    />
-                  </div>
-                )}
+              <Label htmlFor="file-upload">Note Files (Images or PDF)</Label>
+               <div className="mt-2 relative border-2 border-dashed border-muted-foreground/50 rounded-lg p-6 flex flex-col items-center justify-center text-center min-h-[16rem]">
+                 <UploadCloud className="w-12 h-12 text-muted-foreground" />
+                  <p className="mt-4 text-muted-foreground">
+                    Drag & drop files here, or click to select files
+                  </p>
+                  <p className="text-xs text-muted-foreground/80 mt-1">Images and PDFs supported</p>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept="image/*,application/pdf"
+                    onChange={handleFileChange}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    disabled={isUploading || !user}
+                    multiple
+                  />
               </div>
             </div>
+            
+            {previews.length > 0 && (
+              <div>
+                <p className="font-medium mb-2">Selected Files:</p>
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                  {previews.map((item, index) => (
+                    <div key={index} className="relative group">
+                       {item.file.type.startsWith('image/') ? (
+                         <Image
+                            src={item.previewUrl}
+                            alt={item.file.name}
+                            width={150}
+                            height={150}
+                            className="w-full h-32 object-cover rounded-md"
+                          />
+                       ) : (
+                         <div className="w-full h-32 bg-muted rounded-md flex flex-col items-center justify-center p-2">
+                           <FileText className="w-12 h-12 text-muted-foreground" />
+                           <p className="text-xs text-center text-muted-foreground mt-2 truncate">{item.file.name}</p>
+                         </div>
+                       )}
+                       <Button
+                        variant="destructive"
+                        size="icon"
+                        className="absolute -top-2 -right-2 rounded-full h-6 w-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeFile(item.file)}
+                        disabled={isUploading}
+                      >
+                        <X className="h-4 w-4" />
+                        <span className="sr-only">Remove file</span>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {!user && (
               <p className="text-sm text-center text-destructive">
                 Please sign in to share your notes with the community.
@@ -232,9 +264,9 @@ export default function CommunityNotesTool() {
             )}
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isUploading || !user || !title.trim() || !description.trim() || !imageFile}>
+            <Button type="submit" disabled={isUploading || !user || !title.trim() || !description.trim() || files.length === 0}>
               {isUploading && <LoadingSpinner className="mr-2" />}
-              {isUploading ? 'Sharing...' : 'Share with Community'}
+              {isUploading ? `Sharing ${files.length} file(s)...` : 'Share with Community'}
             </Button>
           </CardFooter>
         </form>
@@ -283,9 +315,28 @@ export default function CommunityNotesTool() {
                 <p className="text-sm text-muted-foreground">{note.description}</p>
               </CardContent>
               <CardFooter>
-                <a href={note.imageUrl} target="_blank" rel="noopener noreferrer" className="w-full">
-                  <Image src={note.imageUrl} alt={note.title} width={400} height={300} className="w-full h-48 object-cover rounded-md transition-transform hover:scale-105" data-ai-hint="document study" />
-                </a>
+                 <div className="w-full">
+                    {note.fileUrls && note.fileUrls.length > 0 ? (
+                      <div className="grid grid-cols-2 gap-2">
+                        {note.fileUrls.map((url, index) => (
+                           <a href={url} target="_blank" rel="noopener noreferrer" key={index} className="w-full">
+                           {note.fileTypes[index]?.startsWith('image/') ? (
+                               <Image src={url} alt={`${note.title} - file ${index + 1}`} width={200} height={150} className="w-full h-32 object-cover rounded-md transition-transform hover:scale-105" data-ai-hint="document study" />
+                           ) : (
+                                <div className="w-full h-32 bg-muted rounded-md flex flex-col items-center justify-center p-2 transition-colors hover:bg-muted/80">
+                                   <FileText className="w-10 h-10 text-muted-foreground" />
+                                   <p className="text-xs text-center text-primary mt-2">View PDF</p>
+                                </div>
+                           )}
+                         </a>
+                        ))}
+                      </div>
+                    ) : (
+                       <div className="w-full h-32 bg-muted rounded-md flex flex-col items-center justify-center">
+                          <p className="text-sm text-muted-foreground">No files attached</p>
+                        </div>
+                    )}
+                </div>
               </CardFooter>
             </Card>
           ))}
@@ -294,3 +345,4 @@ export default function CommunityNotesTool() {
     </div>
   );
 }
+
