@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic, Gamepad2 } from 'lucide-react';
 import Link from 'next/link';
 
 const tools = [
@@ -96,6 +96,13 @@ const tools = [
     href: '/voice-to-text-notes',
     icon: <Mic className="h-8 w-8 text-primary" />,
     cta: 'Transcribe Audio',
+  },
+  {
+    title: 'MCQ Game Mode',
+    description: 'Convert your quizzes into a fun, gamified learning session to test your knowledge.',
+    href: '/mcq-game-mode',
+    icon: <Gamepad2 className="h-8 w-8 text-primary" />,
+    cta: 'Play a Game',
   }
 ];
 
