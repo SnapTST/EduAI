@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic, Gamepad2, ClipboardList } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic, Gamepad2, ClipboardList, Bookmark } from 'lucide-react';
 import Link from 'next/link';
 
 const tools = [
@@ -154,6 +154,74 @@ export function Dashboard() {
             </Card>
           ))}
         </div>
+
+        <div className="mt-24">
+          <div className="text-center mb-12 md:mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold font-headline tracking-tighter mb-4">
+              Your Saved Content
+            </h2>
+            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+              All your generated notes, quizzes, and summaries will appear here once you save them.
+            </p>
+          </div>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 opacity-50">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Bookmark className="h-6 w-6 text-primary" />
+                  <span>Physics Chapter 5 Summary</span>
+                </CardTitle>
+                <CardDescription>Generated from: Text Summarizer</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground line-clamp-3">
+                  This is a placeholder for a saved summary about the laws of thermodynamics. It would contain the key points...
+                </p>
+              </CardContent>
+              <CardFooter>
+                 <Button disabled>View Content</Button>
+              </CardFooter>
+            </Card>
+             <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Bookmark className="h-6 w-6 text-primary" />
+                  <span>History Midterm Quiz</span>
+                </CardTitle>
+                <CardDescription>Generated from: Quiz Generator</CardDescription>
+              </CardHeader>
+              <CardContent>
+                 <p className="text-sm text-muted-foreground line-clamp-3">
+                  This is a placeholder for a saved quiz on World War II. It would contain multiple-choice questions...
+                </p>
+              </CardContent>
+              <CardFooter>
+                 <Button disabled>View Quiz</Button>
+              </CardFooter>
+            </Card>
+             <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Bookmark className="h-6 w-6 text-primary" />
+                  <span>Calculus Lecture Notes</span>
+                </CardTitle>
+                <CardDescription>Generated from: YouTube Notes</CardDescription>
+              </CardHeader>
+              <CardContent>
+                 <p className="text-sm text-muted-foreground line-clamp-3">
+                  This is a placeholder for saved notes from a YouTube video about derivatives. The notes would cover the core concepts...
+                </p>
+              </CardContent>
+              <CardFooter>
+                 <Button disabled>View Notes</Button>
+              </CardFooter>
+            </Card>
+          </div>
+           <div className="text-center mt-8">
+              <p className="text-muted-foreground text-sm">(Note: Saving and bookmarking features are coming soon!)</p>
+            </div>
+        </div>
+
       </div>
     </section>
   );
