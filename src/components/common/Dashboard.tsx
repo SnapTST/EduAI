@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2 } from 'lucide-react';
 import Link from 'next/link';
 
 const tools = [
@@ -41,6 +41,13 @@ const tools = [
     icon: <Youtube className="h-8 w-8 text-primary" />,
     cta: 'Generate Notes',
   },
+  {
+    title: 'Text-to-Voice Reading',
+    description: 'Turn your notes and study materials into audio lessons that you can listen to on the go.',
+    href: '/text-to-voice',
+    icon: <Volume2 className="h-8 w-8 text-primary" />,
+    cta: 'Convert to Audio',
+  }
 ];
 
 export function Dashboard() {
