@@ -21,6 +21,13 @@ import { Timestamp } from 'firebase/firestore';
 
 const tools = [
   {
+    title: 'Community Notes',
+    description: 'Share your notes with the community and browse materials uploaded by other students.',
+    href: '/community-notes',
+    icon: <Users className="h-8 w-8 text-primary" />,
+    cta: 'View Community Notes',
+  },
+  {
     title: 'AI Summarizer',
     description:
       'Upload documents or paste text to get concise, AI-generated summaries in seconds. Perfect for quick reviews.',
@@ -120,13 +127,6 @@ const tools = [
     href: '/revision-sheet-maker',
     icon: <ClipboardList className="h-8 w-8 text-primary" />,
     cta: 'Create a Sheet',
-  },
-  {
-    title: 'Community Notes',
-    description: 'Share your notes with the community and browse materials uploaded by other students.',
-    href: '/community-notes',
-    icon: <Users className="h-8 w-8 text-primary" />,
-    cta: 'View Community Notes',
   }
 ];
 
