@@ -13,6 +13,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { ScrollArea } from '../ui/scroll-area';
 import { useSavedContent } from '@/hooks/use-saved-content';
+import { Label } from '../ui/label';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -83,18 +84,15 @@ export default function ExplainerBotTool() {
     const lastUserMessage = messages.filter(m => m.sender === 'user').pop();
     const title = lastUserMessage ? `Chat about: ${lastUserMessage.text.substring(0,30)}...` : 'Chat Conversation';
 
-    const success = saveContent({
+    saveContent({
       title: title,
       tool: 'AI Explainer Bot',
       content: conversationText,
     });
 
     toast({
-      title: success ? 'Conversation Saved!' : 'Failed to Save',
-      description: success
-        ? 'The chat has been saved to your dashboard.'
-        : 'There was an issue saving your chat.',
-      variant: success ? 'default' : 'destructive',
+      title: 'Conversation Saved!',
+      description: 'The chat has been saved to your dashboard.',
     });
   };
 
@@ -167,16 +165,17 @@ export default function ExplainerBotTool() {
             </div>
           </ScrollArea>
           <form onSubmit={handleSubmit} className="flex items-center gap-2 pt-4 border-t">
+            <Label htmlFor="explainer-input" className="sr-only">Your question</Label>
             <Input
+              id="explainer-input"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="e.g., Explain the theory of relativity..."
               className="flex-grow"
               disabled={isLoading || !user}
             />
-            <Button type="submit" disabled={isLoading || !input.trim() || !user} size="icon">
+            <Button type="submit" disabled={isLoading || !input.trim() || !user} size="icon" aria-label="Send message">
               <Send className="h-5 w-5" />
-              <span className="sr-only">Send</span>
             </Button>
           </form>
           {!user && (

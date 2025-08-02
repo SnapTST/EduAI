@@ -174,14 +174,15 @@ export default function ExamBuilderTool() {
                     className="rounded-md"
                   />
                   <Button
+                    type="button"
                     variant="destructive"
                     size="icon"
                     className="absolute -top-3 -right-3 rounded-full h-8 w-8 z-10"
                     onClick={clearImage}
                     disabled={isLoading}
+                    aria-label="Remove image"
                   >
                     <X className="h-4 w-4" />
-                    <span className="sr-only">Remove image</span>
                   </Button>
                 </div>
               )}

@@ -191,16 +191,17 @@ export default function OpenRouterChatTool() {
                 </Select>
              </div>
             <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                <Label htmlFor="chat-input" className="sr-only">Your message</Label>
                 <Input
+                id="chat-input"
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 placeholder="Type your message here..."
                 className="flex-grow"
                 disabled={isLoading || !user}
                 />
-                <Button type="submit" disabled={isLoading || !input.trim() || !user} size="icon">
-                <Send className="h-5 w-5" />
-                <span className="sr-only">Send</span>
+                <Button type="submit" disabled={isLoading || !input.trim() || !user} size="icon" aria-label="Send message">
+                    <Send className="h-5 w-5" />
                 </Button>
             </form>
            </div>

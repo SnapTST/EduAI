@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { UploadCloud, Image as ImageIcon, Users, FileText, X } from 'lucide-react';
+import { UploadCloud, FileText, X } from 'lucide-react';
 import Image from 'next/image';
 import { Label } from '../ui/label';
 import { useAuth } from '@/hooks/use-auth';
@@ -202,7 +202,7 @@ export default function CommunityNotesTool() {
             </div>
 
             <div>
-              <Label htmlFor="file-upload">Note Files (Images or PDF)</Label>
+              <Label htmlFor="file-upload" className="font-medium">Note Files (Images or PDF)</Label>
                <div className="mt-2 relative border-2 border-dashed border-muted-foreground/50 rounded-lg p-6 flex flex-col items-center justify-center text-center min-h-[16rem]">
                  <UploadCloud className="w-12 h-12 text-muted-foreground" />
                   <p className="mt-4 text-muted-foreground">
@@ -242,14 +242,15 @@ export default function CommunityNotesTool() {
                          </div>
                        )}
                        <Button
+                        type="button"
                         variant="destructive"
                         size="icon"
                         className="absolute -top-2 -right-2 rounded-full h-6 w-6 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
                         onClick={() => removeFile(item.file)}
                         disabled={isUploading}
+                        aria-label={`Remove ${item.file.name}`}
                       >
                         <X className="h-4 w-4" />
-                        <span className="sr-only">Remove file</span>
                       </Button>
                     </div>
                   ))}
@@ -345,4 +346,3 @@ export default function CommunityNotesTool() {
     </div>
   );
 }
-

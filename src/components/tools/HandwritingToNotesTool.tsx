@@ -74,6 +74,8 @@ export default function HandwritingToNotesTool() {
     setIsLoading(true);
     setExtractedText('');
     try {
+      // Re-using this flow as it primarily extracts text which is what we need.
+      // The extra exam questions can be ignored.
       const result = await extractTextAndGenerateExamQuestions({ photoDataUri });
       setExtractedText(result.extractedText);
     } catch (error) {
@@ -174,14 +176,15 @@ export default function HandwritingToNotesTool() {
                     className="rounded-md"
                   />
                   <Button
+                    type="button"
                     variant="destructive"
                     size="icon"
                     className="absolute -top-3 -right-3 rounded-full h-8 w-8 z-10"
                     onClick={clearImage}
                     disabled={isLoading}
+                    aria-label="Remove image"
                   >
                     <X className="h-4 w-4" />
-                    <span className="sr-only">Remove image</span>
                   </Button>
                 </div>
               )}
@@ -211,13 +214,15 @@ export default function HandwritingToNotesTool() {
           <CardHeader>
             <CardTitle>Converted Notes</CardTitle>
             <CardDescription>
-              Here is the typed version of your handwritten notes.
+              Here is the typed version of your handwritten notes. You can edit it below.
             </CardDescription>
           </CardHeader>
           <CardContent>
+            <Label htmlFor="converted-text" className="sr-only">Converted Text</Label>
             <Textarea
-              readOnly
+              id="converted-text"
               value={extractedText}
+              onChange={(e) => setExtractedText(e.target.value)}
               className="min-h-[300px] text-base bg-muted"
             />
           </CardContent>

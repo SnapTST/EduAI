@@ -1,17 +1,16 @@
 
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { transcribeAndSummarize } from '@/ai/flows/transcribe-and-summarize';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { Save, Share2, Mic, StopCircle, Upload, FileAudio, AlertTriangle } from 'lucide-react';
+import { Save, Share2, Mic, StopCircle, Upload } from 'lucide-react';
 import { Label } from '../ui/label';
 import { useAuth } from '@/hooks/use-auth';
 import { Textarea } from '../ui/textarea';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 import { useSavedContent } from '@/hooks/use-saved-content';
 
 type RecordingStatus = 'idle' | 'recording' | 'stopped';
@@ -238,8 +237,8 @@ export default function VoiceToTextNotesTool() {
 
           {audioUrl && (
             <div className="pt-4 space-y-2">
-                <Label>Audio Preview</Label>
-                <audio src={audioUrl} controls className="w-full" />
+                <Label htmlFor="audio-preview">Audio Preview</Label>
+                <audio id="audio-preview" src={audioUrl} controls className="w-full" />
             </div>
           )}
         </CardContent>
@@ -261,16 +260,18 @@ export default function VoiceToTextNotesTool() {
           </CardHeader>
           <CardContent className='space-y-6'>
             <div>
-              <Label className='text-lg'>Summary</Label>
+              <Label htmlFor="summary-text" className='text-lg'>Summary</Label>
               <Textarea
+                id="summary-text"
                 readOnly
                 value={summary}
                 className="min-h-[200px] text-base bg-muted mt-2"
               />
             </div>
              <div>
-              <Label className='text-lg'>Full Transcription</Label>
+              <Label htmlFor="transcription-text" className='text-lg'>Full Transcription</Label>
               <Textarea
+                id="transcription-text"
                 readOnly
                 value={transcription}
                 className="min-h-[200px] text-base bg-muted mt-2"
