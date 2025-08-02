@@ -8,114 +8,75 @@ import {
   useContext,
   ReactNode,
 } from 'react';
+import {
+  onAuthStateChanged,
+  signOut,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  GoogleAuthProvider,
+  signInWithPopup,
+  User as FirebaseUser,
+} from 'firebase/auth';
+import { auth } from '@/lib/firebase';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { useRouter } from 'next/navigation';
 
-// User data structure
-interface User {
-  username: string;
-  displayName: string;
-  email: string;
-  photoURL?: string;
+// Simplified user data structure for the app
+interface AppUser {
+  uid: string;
+  displayName: string | null;
+  email: string | null;
+  photoURL: string | null;
 }
 
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
-  login: (username: string, pass: string) => boolean;
-  register: (email: string, username: string, pass: string) => boolean;
-  logout: () => void;
+  login: (email: string, pass: string) => Promise<FirebaseUser | null>;
+  register: (email: string, pass: string) => Promise<FirebaseUser | null>;
+  loginWithGoogle: () => Promise<FirebaseUser | null>;
+  logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// A mock user for demonstration purposes if no one has registered
-const MOCK_USER: User = {
-    username: 'alex',
-    displayName: 'Alex',
-    email: 'student@example.com',
-    photoURL: 'https://placehold.co/100x100.png'
-}
-const MOCK_PASSWORD = 'password';
-const AUTH_KEY = 'eduai-scholar-auth';
-const REGISTERED_USER_KEY = 'eduai-scholar-registered-user';
-
-
-export const AuthProvider = ({children}: {children: ReactNode}) => {
-  const [user, setUser] = useState<User | null>(null);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    // Check if the user is "logged in" from a previous session
-    const storedAuth = localStorage.getItem(AUTH_KEY);
-    if (storedAuth) {
-        try {
-            const authData = JSON.parse(storedAuth);
-            if (authData.isAuthenticated) {
-                const storedUser = localStorage.getItem(REGISTERED_USER_KEY);
-                if (storedUser) {
-                  setUser(JSON.parse(storedUser));
-                } else {
-                  // Fallback to mock user if something is wrong
-                  setUser(MOCK_USER);
-                }
-            }
-        } catch (e) {
-            console.error("Failed to parse auth data", e);
-            localStorage.removeItem(AUTH_KEY);
-        }
-    }
-    setLoading(false);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        const { uid, displayName, email, photoURL } = firebaseUser;
+        setUser({ uid, displayName, email, photoURL });
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const login = (username: string, pass: string): boolean => {
-    const storedUserRaw = localStorage.getItem(REGISTERED_USER_KEY);
-    
-    // Check against registered user first
-    if(storedUserRaw) {
-      const storedUser = JSON.parse(storedUserRaw);
-      if (username === storedUser.username && pass === storedUser.password) {
-        setUser(storedUser.user);
-        localStorage.setItem(AUTH_KEY, JSON.stringify({ isAuthenticated: true }));
-        return true;
-      }
-    }
+  const login = async (email: string, pass: string): Promise<FirebaseUser | null> => {
+    const userCredential = await signInWithEmailAndPassword(auth, email, pass);
+    return userCredential.user;
+  };
+  
+  const loginWithGoogle = async (): Promise<FirebaseUser | null> => {
+    const provider = new GoogleAuthProvider();
+    const result = await signInWithPopup(auth, provider);
+    return result.user;
+  }
 
-    // Fallback to default mock user
-    if (username.toLowerCase() === MOCK_USER.username && pass === MOCK_PASSWORD) {
-        setUser(MOCK_USER);
-        localStorage.setItem(AUTH_KEY, JSON.stringify({ isAuthenticated: true }));
-        // Also save the mock user as the "registered" user for consistency
-        localStorage.setItem(REGISTERED_USER_KEY, JSON.stringify({ user: MOCK_USER, password: MOCK_PASSWORD }));
-        return true;
-    }
-
-    return false;
+  const register = async (email: string, pass: string): Promise<FirebaseUser | null> => {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+    return userCredential.user;
   };
 
-  const register = (email: string, username: string, pass: string): boolean => {
-    // In a real app, you'd check if the username or email is already taken.
-    // Here we just overwrite any existing registered user for simplicity.
-    const newUser: User = {
-      email,
-      username,
-      displayName: username,
-      photoURL: `https://placehold.co/100x100.png?text=${username.charAt(0).toUpperCase()}`
-    };
-
-    localStorage.setItem(REGISTERED_USER_KEY, JSON.stringify({ user: newUser, password: pass }));
-    
-    // Automatically log in the user after registration
-    setUser(newUser);
-    localStorage.setItem(AUTH_KEY, JSON.stringify({ isAuthenticated: true }));
-
-    return true;
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem(AUTH_KEY);
+  const logout = async () => {
+    await signOut(auth);
     router.push('/login');
   };
 
@@ -128,7 +89,7 @@ export const AuthProvider = ({children}: {children: ReactNode}) => {
   }
 
   return (
-    <AuthContext.Provider value={{user, loading, login, register, logout}}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, loginWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

@@ -9,13 +9,20 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import type { SavedContent } from '@/hooks/use-saved-content';
 import { Badge } from '../ui/badge';
+
+interface DialogReadyContent {
+  id: string;
+  title: string;
+  tool: string;
+  content: string;
+  timestamp: number; // as milliseconds
+}
 
 interface SavedContentDialogProps {
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  content: SavedContent | null;
+  content: DialogReadyContent | null;
 }
 
 export function SavedContentDialog({

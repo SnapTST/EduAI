@@ -2,60 +2,110 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { db, auth } from '@/lib/firebase';
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  orderBy,
+  getDocs,
+  deleteDoc,
+  doc,
+  Timestamp,
+} from 'firebase/firestore';
 
 export interface SavedContent {
-  id: string;
+  id: string; // Firestore document ID
+  userId: string;
   title: string;
   tool: string;
   content: string;
-  timestamp: number;
+  timestamp: Timestamp;
 }
 
-const STORAGE_KEY = 'eduai-scholar-saved-content';
+export interface NewSavedContent {
+  title: string;
+  tool: string;
+  content: string;
+}
 
 export function useSavedContent() {
   const [savedContents, setSavedContents] = useState<SavedContent[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [user, setUser] = useState(auth.currentUser);
 
   useEffect(() => {
-    try {
-      const items = window.localStorage.getItem(STORAGE_KEY);
-      if (items) {
-        setSavedContents(JSON.parse(items));
-      }
-    } catch (error) {
-      console.error("Failed to load saved content from localStorage", error);
-    } finally {
-        setIsLoaded(true);
-    }
+    const unsubscribe = auth.onAuthStateChanged((newUser) => {
+      setUser(newUser);
+    });
+    return () => unsubscribe();
   }, []);
 
-  const saveContent = useCallback((content: Omit<SavedContent, 'id' | 'timestamp'>) => {
-    try {
-      const newContent: SavedContent = {
-        ...content,
-        id: `saved-${Date.now()}`,
-        timestamp: Date.now(),
-      };
-      const newSavedContents = [newContent, ...savedContents];
-      setSavedContents(newSavedContents);
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newSavedContents));
-      return true;
-    } catch (error) {
-      console.error("Failed to save content to localStorage", error);
-      return false;
+  const fetchSavedContent = useCallback(async () => {
+    if (!user) {
+      setSavedContents([]);
+      setIsLoaded(true);
+      return;
     }
-  }, [savedContents]);
-  
-  const deleteContent = useCallback((id: string) => {
+
+    setIsLoaded(false);
     try {
-      const newSavedContents = savedContents.filter(item => item.id !== id);
-      setSavedContents(newSavedContents);
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(newSavedContents));
+      const q = query(
+        collection(db, 'savedContent'),
+        where('userId', '==', user.uid),
+        orderBy('timestamp', 'desc')
+      );
+      const querySnapshot = await getDocs(q);
+      const contents = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      })) as SavedContent[];
+      setSavedContents(contents);
     } catch (error) {
-      console.error("Failed to delete content from localStorage", error);
+      console.error('Failed to load saved content from Firestore', error);
+    } finally {
+      setIsLoaded(true);
     }
-  }, [savedContents]);
+  }, [user]);
+
+  useEffect(() => {
+    fetchSavedContent();
+  }, [fetchSavedContent]);
+
+  const saveContent = useCallback(
+    async (content: NewSavedContent) => {
+      if (!user) {
+        console.error('User not logged in, cannot save content.');
+        return false;
+      }
+      try {
+        await addDoc(collection(db, 'savedContent'), {
+          ...content,
+          userId: user.uid,
+          timestamp: Timestamp.now(),
+        });
+        fetchSavedContent(); // Re-fetch to update the list
+        return true;
+      } catch (error) {
+        console.error('Failed to save content to Firestore', error);
+        return false;
+      }
+    },
+    [user, fetchSavedContent]
+  );
+
+  const deleteContent = useCallback(
+    async (id: string) => {
+      try {
+        await deleteDoc(doc(db, 'savedContent', id));
+        fetchSavedContent(); // Re-fetch to update the list
+      } catch (error) {
+        console.error('Failed to delete content from Firestore', error);
+      }
+    },
+    [fetchSavedContent]
+  );
 
   return { savedContents, saveContent, deleteContent, isLoaded };
 }

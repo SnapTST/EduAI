@@ -16,6 +16,8 @@ import { useSavedContent } from '@/hooks/use-saved-content';
 import type { SavedContent } from '@/hooks/use-saved-content';
 import { SavedContentDialog } from './SavedContentDialog';
 import { Skeleton } from '../ui/skeleton';
+import { useAuth } from '@/hooks/use-auth';
+import { Timestamp } from 'firebase/firestore';
 
 const tools = [
   {
@@ -121,13 +123,25 @@ const tools = [
   }
 ];
 
+// A version of SavedContent that can be serialized for the dialog
+interface DialogReadyContent extends Omit<SavedContent, 'timestamp'> {
+  timestamp: number;
+}
+
+
 export function Dashboard() {
+  const { user } = useAuth();
   const { savedContents, deleteContent, isLoaded } = useSavedContent();
-  const [selectedContent, setSelectedContent] = useState<SavedContent | null>(null);
+  const [selectedContent, setSelectedContent] = useState<DialogReadyContent | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const handleViewContent = (content: SavedContent) => {
-    setSelectedContent(content);
+    // Convert Firestore Timestamp to number for serialization
+    const dialogReadyContent: DialogReadyContent = {
+      ...content,
+      timestamp: (content.timestamp as Timestamp).toMillis(),
+    };
+    setSelectedContent(dialogReadyContent);
     setIsDialogOpen(true);
   };
   
@@ -177,63 +191,64 @@ export function Dashboard() {
           ))}
         </div>
 
-        <div className="mt-24">
-          <div className="text-center mb-12 md:mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold font-headline tracking-tighter mb-4">
-              Your Saved Content
-            </h2>
-            <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
-              All your generated notes, quizzes, and summaries will appear here once you save them.
-            </p>
+        {user && (
+          <div className="mt-24">
+            <div className="text-center mb-12 md:mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold font-headline tracking-tighter mb-4">
+                Your Saved Content
+              </h2>
+              <p className="text-lg md:text-xl text-muted-foreground max-w-3xl mx-auto">
+                All your generated notes, quizzes, and summaries will appear here once you save them.
+              </p>
+            </div>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+            {!isLoaded && Array.from({ length: 3 }).map((_, i) => 
+                  <Card key={i}>
+                      <CardHeader>
+                          <Skeleton className="h-6 w-3/4" />
+                          <Skeleton className="h-4 w-1/2" />
+                      </CardHeader>
+                      <CardContent>
+                          <Skeleton className="h-12 w-full" />
+                      </CardContent>
+                      <CardContent className="flex gap-2">
+                          <Skeleton className="h-10 w-24" />
+                          <Skeleton className="h-10 w-10" />
+                      </CardContent>
+                  </Card>
+              )}
+
+              {isLoaded && savedContents.length === 0 && (
+                  <div className="md:col-span-2 lg:col-span-3 text-center text-muted-foreground">
+                      You haven't saved any content yet. Use the "Save" button on any tool to bookmark your generated content.
+                  </div>
+              )}
+
+              {isLoaded && savedContents.map((content) => (
+                  <Card key={content.id}>
+                      <CardHeader>
+                          <CardTitle className="flex items-center gap-2 text-xl">
+                          <Bookmark className="h-6 w-6 text-primary" />
+                          <span className='truncate'>{content.title}</span>
+                          </CardTitle>
+                          <CardDescription>Generated from: {content.tool}</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                          <p className="text-sm text-muted-foreground line-clamp-3">
+                              {content.content}
+                          </p>
+                      </CardContent>
+                      <CardContent className="flex justify-between items-center">
+                          <Button onClick={() => handleViewContent(content)}>View Content</Button>
+                          <Button variant="ghost" size="icon" onClick={() => deleteContent(content.id)}>
+                              <Trash2 className="h-5 w-5 text-destructive" />
+                          </Button>
+                      </CardContent>
+                  </Card>
+              ))}
+            </div>
           </div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-           {!isLoaded && Array.from({ length: 3 }).map((_, i) => 
-                <Card key={i}>
-                    <CardHeader>
-                        <Skeleton className="h-6 w-3/4" />
-                        <Skeleton className="h-4 w-1/2" />
-                    </CardHeader>
-                    <CardContent>
-                        <Skeleton className="h-12 w-full" />
-                    </CardContent>
-                    <CardContent className="flex gap-2">
-                        <Skeleton className="h-10 w-24" />
-                        <Skeleton className="h-10 w-10" />
-                    </CardContent>
-                </Card>
-            )}
-
-            {isLoaded && savedContents.length === 0 && (
-                <div className="md:col-span-2 lg:col-span-3 text-center text-muted-foreground">
-                    You haven't saved any content yet. Use the "Save" button on any tool to bookmark your generated content.
-                </div>
-            )}
-
-            {isLoaded && savedContents.map((content) => (
-                <Card key={content.id}>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-xl">
-                        <Bookmark className="h-6 w-6 text-primary" />
-                        <span className='truncate'>{content.title}</span>
-                        </CardTitle>
-                        <CardDescription>Generated from: {content.tool}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground line-clamp-3">
-                            {content.content}
-                        </p>
-                    </CardContent>
-                    <CardContent className="flex justify-between items-center">
-                        <Button onClick={() => handleViewContent(content)}>View Content</Button>
-                        <Button variant="ghost" size="icon" onClick={() => deleteContent(content.id)}>
-                            <Trash2 className="h-5 w-5 text-destructive" />
-                        </Button>
-                    </CardContent>
-                </Card>
-            ))}
-          </div>
-        </div>
-
+        )}
       </div>
     </section>
   );
