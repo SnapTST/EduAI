@@ -1,0 +1,6 @@
+# See https://www.robotstxt.org/robotstxt.html for documentation on how to use the robots.txt file
+#
+# A robot should read this file before accessing any other file on this web server.
+
+User-agent: *
+Allow: /
