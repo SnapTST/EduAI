@@ -1,4 +1,3 @@
-
 import { config } from 'dotenv';
 config();
 
@@ -14,3 +13,4 @@ import '@/ai/flows/explain-topic.ts';
 import '@/ai/flows/analyze-past-paper.ts';
 import '@/ai/flows/transcribe-and-summarize.ts';
 import '@/ai/flows/parse-mcq-quiz.ts';
+import '@/ai/flows/openrouter.ts';

@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic, Gamepad2, ClipboardList, Bookmark, Trash2, Users } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic, Gamepad2, ClipboardList, Bookmark, Trash2, Users, Bot } from 'lucide-react';
 import Link from 'next/link';
 import { useSavedContent } from '@/hooks/use-saved-content';
 import type { SavedContent } from '@/hooks/use-saved-content';
@@ -26,6 +26,13 @@ const tools = [
     href: '/community-notes',
     icon: <Users className="h-8 w-8 text-primary" />,
     cta: 'View Community Notes',
+  },
+  {
+    title: 'OpenRouter Chat',
+    description: 'Experiment with various AI models from OpenRouter in a simple chat interface.',
+    href: '/openrouter-chat',
+    icon: <Bot className="h-8 w-8 text-primary" />,
+    cta: 'Start Chatting',
   },
   {
     title: 'AI Summarizer',
@@ -273,4 +280,3 @@ export function Dashboard() {
       </div>
     </section>
   );
-}
