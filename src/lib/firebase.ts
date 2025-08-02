@@ -1,3 +1,4 @@
+
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
@@ -6,13 +7,13 @@ import { getFirestore } from "firebase/firestore";
 // TODO: Replace the following with your app's Firebase project configuration
 // For more information, visit: https://firebase.google.com/docs/web/setup#available-libraries
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-  measurementId: "YOUR_MEASUREMENT_ID"
+  apiKey: "AIzaSyBsKggq05-IlxikteRlYMMGRcMVoj0iDu0",
+  authDomain: "eduai-scholar.firebaseapp.com",
+  projectId: "eduai-scholar",
+  storageBucket: "eduai-scholar.firebasestorage.app",
+  messagingSenderId: "606202680678",
+  appId: "1:606202680678:web:c02ae1b134e7523fe164a7",
+  measurementId: "G-YNKSJ3K7KE"
 };
 
 // Initialize Firebase
