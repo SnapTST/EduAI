@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube } from 'lucide-react';
 import Link from 'next/link';
 
 const tools = [
@@ -34,6 +34,13 @@ const tools = [
     icon: <FileScan className="h-8 w-8 text-primary" />,
     cta: 'Build an Exam',
   },
+  {
+    title: 'YouTube Video Notes',
+    description: 'Paste a YouTube video link to get a summary, notes, and a quiz based on the video\'s content.',
+    href: '/youtube-notes',
+    icon: <Youtube className="h-8 w-8 text-primary" />,
+    cta: 'Generate Notes',
+  },
 ];
 
 export function Dashboard() {
@@ -49,7 +56,7 @@ export function Dashboard() {
             create exams from your notes. All for free, forever.
           </p>
         </div>
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {tools.map((tool) => (
             <Card
               key={tool.title}
