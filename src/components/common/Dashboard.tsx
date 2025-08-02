@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit } from 'lucide-react';
 import Link from 'next/link';
 
 const tools = [
@@ -61,6 +61,13 @@ const tools = [
     href: '/flashcard-maker',
     icon: <FileText className="h-8 w-8 text-primary" />,
     cta: 'Create Flashcards',
+  },
+  {
+    title: 'Handwriting to Notes',
+    description: 'Upload an image of your handwritten notes and get clean, typed text in seconds.',
+    href: '/handwriting-to-notes',
+    icon: <Edit className="h-8 w-8 text-primary" />,
+    cta: 'Convert to Text',
   }
 ];
 

@@ -10,12 +10,13 @@ import { Save, Share2, UploadCloud, Image as ImageIcon, X } from 'lucide-react';
 import Image from 'next/image';
 import { Label } from '../ui/label';
 import { useAuth } from '@/hooks/use-auth';
+import { Textarea } from '../ui/textarea';
 
-export default function ExamBuilderTool() {
+export default function HandwritingToNotesTool() {
   const { user } = useAuth();
   const [photoDataUri, setPhotoDataUri] = useState<string | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [examQuestions, setExamQuestions] = useState<string[]>([]);
+  const [extractedText, setExtractedText] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
@@ -43,7 +44,7 @@ export default function ExamBuilderTool() {
   const clearImage = () => {
     setImagePreview(null);
     setPhotoDataUri(null);
-    setExamQuestions([]);
+    setExtractedText('');
     const fileInput = document.getElementById('image-upload') as HTMLInputElement;
     if (fileInput) {
       fileInput.value = '';
@@ -54,7 +55,7 @@ export default function ExamBuilderTool() {
     if (!photoDataUri) {
       toast({
         title: 'Image Required',
-        description: 'Please upload an image to generate exam questions.',
+        description: 'Please upload an image to extract text.',
         variant: 'destructive',
       });
       return;
@@ -62,34 +63,30 @@ export default function ExamBuilderTool() {
     if (!user) {
       toast({
         title: 'Authentication Required',
-        description: 'Please sign in to build an exam.',
+        description: 'Please sign in to convert handwriting to notes.',
         variant: 'destructive',
       });
       return;
     }
     setIsLoading(true);
-    setExamQuestions([]);
+    setExtractedText('');
     try {
       const result = await extractTextAndGenerateExamQuestions({ photoDataUri });
-      setExamQuestions(result.examQuestions);
+      setExtractedText(result.extractedText);
     } catch (error) {
       console.error(error);
       toast({
         title: 'Error',
-        description: 'Failed to generate exam questions. Please try again.',
+        description: 'Failed to extract text from image. Please try again.',
         variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
     }
   };
-  
+
   const handleSaveToDrive = () => {
     toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
-  }
-  
-  const handleSaveToTerabox = () => {
-    toast({ title: "Coming Soon!", description: "TeraBox integration is under development." });
   }
 
   const handleShare = () => {
@@ -99,17 +96,17 @@ export default function ExamBuilderTool() {
   return (
     <div className="space-y-8">
       <div className="text-center">
-        <h1 className="text-4xl font-bold font-headline">AI Exam Builder</h1>
+        <h1 className="text-4xl font-bold font-headline">Handwriting to Notes Converter</h1>
         <p className="text-muted-foreground mt-2">
-          Upload a photo of your notes or textbook to create practice exam questions.
+          Upload a picture of your handwritten notes to get clean, typed text.
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Upload Your Material</CardTitle>
+          <CardTitle>Upload Your Notes</CardTitle>
           <CardDescription>
-            Choose an image file (PNG, JPG, etc.) of your study material.
+            Choose an image file (PNG, JPG, etc.) of your handwritten notes.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -137,7 +134,7 @@ export default function ExamBuilderTool() {
                 <div className="relative w-full h-full">
                   <Image
                     src={imagePreview}
-                    alt="Uploaded material preview"
+                    alt="Uploaded notes preview"
                     fill
                     objectFit="contain"
                     className="rounded-md"
@@ -162,7 +159,7 @@ export default function ExamBuilderTool() {
             )}
              {!user && (
               <p className="text-sm text-center text-destructive">
-                Please sign in to upload an image and build an exam.
+                Please sign in to upload an image and convert your notes.
               </p>
             )}
           </div>
@@ -170,32 +167,29 @@ export default function ExamBuilderTool() {
         <CardFooter>
           <Button onClick={handleSubmit} disabled={isLoading || !photoDataUri || !user}>
             {isLoading && <LoadingSpinner className="mr-2" />}
-            {isLoading ? 'Building Exam...' : 'Generate Exam Questions'}
+            {isLoading ? 'Converting...' : 'Convert to Text'}
           </Button>
         </CardFooter>
       </Card>
 
-      {examQuestions.length > 0 && (
+      {extractedText && (
         <Card>
           <CardHeader>
-            <CardTitle>Generated Exam Questions</CardTitle>
+            <CardTitle>Converted Notes</CardTitle>
             <CardDescription>
-              Here are some potential questions based on your material.
+              Here is the typed version of your handwritten notes.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ul className="space-y-4 list-decimal list-inside bg-muted p-6 rounded-md">
-              {examQuestions.map((q, index) => (
-                <li key={index} className="prose dark:prose-invert max-w-none">{q}</li>
-              ))}
-            </ul>
+            <Textarea
+              readOnly
+              value={extractedText}
+              className="min-h-[300px] text-base bg-muted"
+            />
           </CardContent>
           <CardFooter className="gap-2">
             <Button variant="outline" onClick={handleSaveToDrive}>
               <Save className="mr-2 h-4 w-4" /> Save to Google Drive
-            </Button>
-            <Button variant="outline" onClick={handleSaveToTerabox}>
-                <ImageIcon className="mr-2 h-4 w-4" /> Save Image to TeraBox
             </Button>
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share

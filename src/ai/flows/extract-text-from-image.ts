@@ -20,6 +20,7 @@ const ExtractTextAndGenerateExamQuestionsInputSchema = z.object({
 export type ExtractTextAndGenerateExamQuestionsInput = z.infer<typeof ExtractTextAndGenerateExamQuestionsInputSchema>;
 
 const ExtractTextAndGenerateExamQuestionsOutputSchema = z.object({
+  extractedText: z.string().describe('The raw text extracted from the image.'),
   examQuestions: z.array(z.string()).describe('The generated exam questions.'),
 });
 export type ExtractTextAndGenerateExamQuestionsOutput = z.infer<typeof ExtractTextAndGenerateExamQuestionsOutputSchema>;
@@ -36,7 +37,8 @@ const prompt = ai.definePrompt({
   output: {schema: ExtractTextAndGenerateExamQuestionsOutputSchema},
   prompt: `You are an expert educator specializing in generating exam questions based on provided text and images.
 
-You will extract the text from the following image and generate possible exam questions to test the knowledge. The exam questions should be in the form of multiple choice questions.
+You will first extract the raw text from the following image.
+Then, you will generate possible exam questions to test the knowledge from the text. The exam questions should be in the form of multiple choice questions.
 
 Image: {{media url=photoDataUri}}
 `,
