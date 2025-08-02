@@ -6,7 +6,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic } from 'lucide-react';
 import Link from 'next/link';
 
 const tools = [
@@ -89,6 +89,13 @@ const tools = [
     href: '/past-paper-analyzer',
     icon: <ClipboardCheck className="h-8 w-8 text-primary" />,
     cta: 'Analyze Paper',
+  },
+  {
+    title: 'Voice-to-Text Notes',
+    description: 'Record your voice or upload audio to get it transcribed and summarized into notes.',
+    href: '/voice-to-text-notes',
+    icon: <Mic className="h-8 w-8 text-primary" />,
+    cta: 'Transcribe Audio',
   }
 ];
 
