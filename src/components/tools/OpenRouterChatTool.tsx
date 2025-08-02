@@ -22,9 +22,8 @@ interface Message {
 }
 
 const openRouterModels = [
-    "mistralai/mistral-7b-instruct",
+    "mistralai/mistral-7b-instruct-v0.2",
     "huggingfaceh4/zephyr-7b-beta",
-    "openai/gpt-3.5-turbo",
     "google/gemini-pro",
     "anthropic/claude-2",
     "meta-llama/llama-2-13b-chat",
@@ -209,4 +208,9 @@ export default function OpenRouterChatTool() {
               <p className="text-sm text-center text-destructive mt-2">
                 Please sign in to chat with OpenRouter models.
               </p>
-            
+            )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
