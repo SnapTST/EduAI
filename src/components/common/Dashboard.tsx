@@ -1,14 +1,21 @@
+
+'use client';
+
+import { useState } from 'react';
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic, Gamepad2, ClipboardList, Bookmark } from 'lucide-react';
+import { Text, HelpCircle, FileScan, ArrowRight, Youtube, Volume2, CheckSquare, FileText, Edit, CalendarDays, MessageCircleQuestion, ClipboardCheck, Mic, Gamepad2, ClipboardList, Bookmark, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import { useSavedContent } from '@/hooks/use-saved-content';
+import type { SavedContent } from '@/hooks/use-saved-content';
+import { SavedContentDialog } from './SavedContentDialog';
+import { Skeleton } from '../ui/skeleton';
 
 const tools = [
   {
@@ -115,8 +122,22 @@ const tools = [
 ];
 
 export function Dashboard() {
+  const { savedContents, deleteContent, isLoaded } = useSavedContent();
+  const [selectedContent, setSelectedContent] = useState<SavedContent | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const handleViewContent = (content: SavedContent) => {
+    setSelectedContent(content);
+    setIsDialogOpen(true);
+  };
+  
   return (
     <section className="w-full py-12 md:py-24 lg:py-32">
+       <SavedContentDialog 
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        content={selectedContent}
+      />
       <div className="container mx-auto px-4 md:px-6">
         <div className="text-center mb-12 md:mb-16">
           <h1 className="text-4xl md:text-5xl font-bold font-headline tracking-tighter mb-4">
@@ -165,62 +186,52 @@ export function Dashboard() {
               All your generated notes, quizzes, and summaries will appear here once you save them.
             </p>
           </div>
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3 opacity-50">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Bookmark className="h-6 w-6 text-primary" />
-                  <span>Physics Chapter 5 Summary</span>
-                </CardTitle>
-                <CardDescription>Generated from: Text Summarizer</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground line-clamp-3">
-                  This is a placeholder for a saved summary about the laws of thermodynamics. It would contain the key points...
-                </p>
-              </CardContent>
-              <CardFooter>
-                 <Button disabled>View Content</Button>
-              </CardFooter>
-            </Card>
-             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Bookmark className="h-6 w-6 text-primary" />
-                  <span>History Midterm Quiz</span>
-                </CardTitle>
-                <CardDescription>Generated from: Quiz Generator</CardDescription>
-              </CardHeader>
-              <CardContent>
-                 <p className="text-sm text-muted-foreground line-clamp-3">
-                  This is a placeholder for a saved quiz on World War II. It would contain multiple-choice questions...
-                </p>
-              </CardContent>
-              <CardFooter>
-                 <Button disabled>View Quiz</Button>
-              </CardFooter>
-            </Card>
-             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-xl">
-                  <Bookmark className="h-6 w-6 text-primary" />
-                  <span>Calculus Lecture Notes</span>
-                </CardTitle>
-                <CardDescription>Generated from: YouTube Notes</CardDescription>
-              </CardHeader>
-              <CardContent>
-                 <p className="text-sm text-muted-foreground line-clamp-3">
-                  This is a placeholder for saved notes from a YouTube video about derivatives. The notes would cover the core concepts...
-                </p>
-              </CardContent>
-              <CardFooter>
-                 <Button disabled>View Notes</Button>
-              </CardFooter>
-            </Card>
+          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+           {!isLoaded && Array.from({ length: 3 }).map((_, i) => 
+                <Card key={i}>
+                    <CardHeader>
+                        <Skeleton className="h-6 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                    </CardHeader>
+                    <CardContent>
+                        <Skeleton className="h-12 w-full" />
+                    </CardContent>
+                    <CardContent className="flex gap-2">
+                        <Skeleton className="h-10 w-24" />
+                        <Skeleton className="h-10 w-10" />
+                    </CardContent>
+                </Card>
+            )}
+
+            {isLoaded && savedContents.length === 0 && (
+                <div className="md:col-span-2 lg:col-span-3 text-center text-muted-foreground">
+                    You haven't saved any content yet. Use the "Save" button on any tool to bookmark your generated content.
+                </div>
+            )}
+
+            {isLoaded && savedContents.map((content) => (
+                <Card key={content.id}>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-xl">
+                        <Bookmark className="h-6 w-6 text-primary" />
+                        <span className='truncate'>{content.title}</span>
+                        </CardTitle>
+                        <CardDescription>Generated from: {content.tool}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-sm text-muted-foreground line-clamp-3">
+                            {content.content}
+                        </p>
+                    </CardContent>
+                    <CardContent className="flex justify-between items-center">
+                        <Button onClick={() => handleViewContent(content)}>View Content</Button>
+                        <Button variant="ghost" size="icon" onClick={() => deleteContent(content.id)}>
+                            <Trash2 className="h-5 w-5 text-destructive" />
+                        </Button>
+                    </CardContent>
+                </Card>
+            ))}
           </div>
-           <div className="text-center mt-8">
-              <p className="text-muted-foreground text-sm">(Note: Saving and bookmarking features are coming soon!)</p>
-            </div>
         </div>
 
       </div>

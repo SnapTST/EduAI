@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -11,6 +12,7 @@ import Image from 'next/image';
 import { Label } from '../ui/label';
 import { useAuth } from '@/hooks/use-auth';
 import { Textarea } from '../ui/textarea';
+import { useSavedContent } from '@/hooks/use-saved-content';
 
 export default function HandwritingToNotesTool() {
   const { user } = useAuth();
@@ -19,6 +21,7 @@ export default function HandwritingToNotesTool() {
   const [extractedText, setExtractedText] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { saveContent } = useSavedContent();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -85,9 +88,20 @@ export default function HandwritingToNotesTool() {
     }
   };
 
-  const handleSaveToDrive = () => {
-    toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
-  }
+  const handleSave = () => {
+    const success = saveContent({
+      title: `Notes from Handwriting`,
+      tool: 'Handwriting to Notes',
+      content: extractedText,
+    });
+    toast({
+      title: success ? 'Notes Saved!' : 'Failed to Save',
+      description: success
+        ? 'Your notes have been saved to the dashboard.'
+        : 'There was an issue saving your notes.',
+      variant: success ? 'default' : 'destructive',
+    });
+  };
 
   const handleShare = () => {
     toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
@@ -188,8 +202,8 @@ export default function HandwritingToNotesTool() {
             />
           </CardContent>
           <CardFooter className="gap-2">
-            <Button variant="outline" onClick={handleSaveToDrive}>
-              <Save className="mr-2 h-4 w-4" /> Save to Google Drive
+            <Button variant="outline" onClick={handleSave}>
+              <Save className="mr-2 h-4 w-4" /> Save to Dashboard
             </Button>
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share

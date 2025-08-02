@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Save, Share2 } from 'lucide-react';
 import { Label } from '../ui/label';
 import { useAuth } from '@/hooks/use-auth';
+import { useSavedContent } from '@/hooks/use-saved-content';
 
 export default function YouTubeNotesGeneratorTool() {
   const { user } = useAuth();
@@ -17,6 +19,7 @@ export default function YouTubeNotesGeneratorTool() {
   const [generatedContent, setGeneratedContent] = useState<{ notes: string; quiz: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { saveContent } = useSavedContent();
 
   const handleSubmit = async () => {
     if (!videoUrl.trim()) {
@@ -52,8 +55,36 @@ export default function YouTubeNotesGeneratorTool() {
     }
   };
 
-  const handleSaveToDrive = () => {
-    toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
+  const handleSaveNotes = () => {
+    if (!generatedContent) return;
+    const success = saveContent({
+      title: `Notes for ${videoUrl}`,
+      tool: 'YouTube Notes Generator',
+      content: generatedContent.notes,
+    });
+    toast({
+      title: success ? 'Notes Saved!' : 'Failed to Save',
+      description: success
+        ? 'Your notes have been saved to the dashboard.'
+        : 'There was an issue saving your notes.',
+      variant: success ? 'default' : 'destructive',
+    });
+  };
+
+  const handleSaveQuiz = () => {
+    if (!generatedContent || !generatedContent.quiz) return;
+    const success = saveContent({
+      title: `Quiz for ${videoUrl}`,
+      tool: 'YouTube Notes Generator',
+      content: generatedContent.quiz,
+    });
+    toast({
+      title: success ? 'Quiz Saved!' : 'Failed to Save',
+      description: success
+        ? 'Your quiz has been saved to the dashboard.'
+        : 'There was an issue saving your quiz.',
+      variant: success ? 'default' : 'destructive',
+    });
   };
 
   const handleShare = () => {
@@ -117,7 +148,7 @@ export default function YouTubeNotesGeneratorTool() {
               </div>
             </CardContent>
              <CardFooter className="gap-2">
-              <Button variant="outline" onClick={handleSaveToDrive}>
+              <Button variant="outline" onClick={handleSaveNotes}>
                 <Save className="mr-2 h-4 w-4" /> Save Notes
               </Button>
               <Button variant="outline" onClick={handleShare}>
@@ -140,7 +171,7 @@ export default function YouTubeNotesGeneratorTool() {
                 </div>
               </CardContent>
               <CardFooter className="gap-2">
-                <Button variant="outline" onClick={handleSaveToDrive}>
+                <Button variant="outline" onClick={handleSaveQuiz}>
                   <Save className="mr-2 h-4 w-4" /> Save Quiz
                 </Button>
                 <Button variant="outline" onClick={handleShare}>

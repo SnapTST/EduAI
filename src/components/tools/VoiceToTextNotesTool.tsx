@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -11,6 +12,7 @@ import { Label } from '../ui/label';
 import { useAuth } from '@/hooks/use-auth';
 import { Textarea } from '../ui/textarea';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { useSavedContent } from '@/hooks/use-saved-content';
 
 type RecordingStatus = 'idle' | 'recording' | 'stopped';
 
@@ -18,12 +20,15 @@ export default function VoiceToTextNotesTool() {
   const { user } = useAuth();
   const [audioDataUri, setAudioDataUri] = useState<string | null>(null);
   const [summary, setSummary] = useState<string>('');
+  const [transcription, setTranscription] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [recordingStatus, setRecordingStatus] = useState<RecordingStatus>('idle');
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
+  const { saveContent } = useSavedContent();
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -42,6 +47,7 @@ export default function VoiceToTextNotesTool() {
         setAudioDataUri(result);
         setAudioUrl(result);
         setSummary('');
+        setTranscription('');
       };
       reader.readAsDataURL(file);
     }
@@ -49,6 +55,7 @@ export default function VoiceToTextNotesTool() {
 
   const startRecording = async () => {
     setSummary('');
+    setTranscription('');
     setAudioUrl(null);
     setAudioDataUri(null);
 
@@ -116,9 +123,11 @@ export default function VoiceToTextNotesTool() {
     }
     setIsLoading(true);
     setSummary('');
+    setTranscription('');
     try {
       const result = await transcribeAndSummarize({ audioDataUri });
       setSummary(result.summary);
+      setTranscription(result.transcription);
     } catch (error) {
       console.error(error);
       toast({
@@ -131,9 +140,22 @@ export default function VoiceToTextNotesTool() {
     }
   };
 
-  const handleSaveToDrive = () => {
-    toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
-  }
+  const handleSave = () => {
+    if (!summary && !transcription) return;
+    const fullContent = `## Summary\n\n${summary}\n\n## Transcription\n\n${transcription}`;
+    const success = saveContent({
+      title: `Notes from Audio`,
+      tool: 'Voice-to-Text Notes',
+      content: fullContent,
+    });
+    toast({
+      title: success ? 'Notes Saved!' : 'Failed to Save',
+      description: success
+        ? 'Your notes have been saved to the dashboard.'
+        : 'There was an issue saving your notes.',
+      variant: success ? 'default' : 'destructive',
+    });
+  };
 
   const handleShare = () => {
     toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
@@ -209,24 +231,35 @@ export default function VoiceToTextNotesTool() {
         </CardFooter>
       </Card>
 
-      {summary && (
+      {(summary || transcription) && (
         <Card>
           <CardHeader>
-            <CardTitle>Summarized Notes</CardTitle>
+            <CardTitle>Generated Notes</CardTitle>
             <CardDescription>
-              Here is the summary of your audio recording.
+              Here is the summary and transcription of your audio recording.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <Textarea
-              readOnly
-              value={summary}
-              className="min-h-[250px] text-base bg-muted"
-            />
+          <CardContent className='space-y-6'>
+            <div>
+              <Label className='text-lg'>Summary</Label>
+              <Textarea
+                readOnly
+                value={summary}
+                className="min-h-[200px] text-base bg-muted mt-2"
+              />
+            </div>
+             <div>
+              <Label className='text-lg'>Full Transcription</Label>
+              <Textarea
+                readOnly
+                value={transcription}
+                className="min-h-[200px] text-base bg-muted mt-2"
+              />
+            </div>
           </CardContent>
           <CardFooter className="gap-2">
-            <Button variant="outline" onClick={handleSaveToDrive}>
-              <Save className="mr-2 h-4 w-4" /> Save to Google Drive
+            <Button variant="outline" onClick={handleSave}>
+              <Save className="mr-2 h-4 w-4" /> Save to Dashboard
             </Button>
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share

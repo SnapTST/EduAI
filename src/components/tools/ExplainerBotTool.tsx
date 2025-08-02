@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect, FormEvent } from 'react';
@@ -7,10 +8,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { Send, User, Bot } from 'lucide-react';
+import { Send, User, Bot, Save } from 'lucide-react';
 import { useAuth } from '@/hooks/use-auth';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { ScrollArea } from '../ui/scroll-area';
+import { useSavedContent } from '@/hooks/use-saved-content';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -24,6 +26,7 @@ export default function ExplainerBotTool() {
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { saveContent } = useSavedContent();
 
   useEffect(() => {
     if (scrollAreaRef.current) {
@@ -50,11 +53,12 @@ export default function ExplainerBotTool() {
 
     const userMessage: Message = { sender: 'user', text: input };
     setMessages((prev) => [...prev, userMessage]);
+    const topic = input;
     setInput('');
     setIsLoading(true);
 
     try {
-      const response = await explainTopic({ topic: input });
+      const response = await explainTopic({ topic });
       const botMessage: Message = { sender: 'bot', text: response.explanation };
       setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
@@ -71,6 +75,29 @@ export default function ExplainerBotTool() {
     }
   };
 
+  const handleSaveConversation = () => {
+    const conversationText = messages
+      .map(msg => `${msg.sender === 'user' ? 'You' : 'AI Bot'}: ${msg.text}`)
+      .join('\n\n');
+    
+    const lastUserMessage = messages.filter(m => m.sender === 'user').pop();
+    const title = lastUserMessage ? `Chat about: ${lastUserMessage.text.substring(0,30)}...` : 'Chat Conversation';
+
+    const success = saveContent({
+      title: title,
+      tool: 'AI Explainer Bot',
+      content: conversationText,
+    });
+
+    toast({
+      title: success ? 'Conversation Saved!' : 'Failed to Save',
+      description: success
+        ? 'The chat has been saved to your dashboard.'
+        : 'There was an issue saving your chat.',
+      variant: success ? 'default' : 'destructive',
+    });
+  };
+
   return (
     <div className="flex flex-col h-[calc(100vh-10rem)]">
       <div className="text-center mb-8">
@@ -81,11 +108,19 @@ export default function ExplainerBotTool() {
       </div>
 
       <Card className="flex-grow flex flex-col">
-        <CardHeader>
-          <CardTitle>Chat</CardTitle>
-          <CardDescription>
-            Ask a question about any topic you're struggling with.
-          </CardDescription>
+        <CardHeader className='flex-row items-center justify-between'>
+          <div>
+            <CardTitle>Chat</CardTitle>
+            <CardDescription>
+              Ask a question about any topic you're struggling with.
+            </CardDescription>
+          </div>
+           {messages.length > 0 && (
+            <Button variant="outline" size="sm" onClick={handleSaveConversation}>
+              <Save className="mr-2 h-4 w-4" />
+              Save Chat
+            </Button>
+          )}
         </CardHeader>
         <CardContent className="flex-grow flex flex-col">
           <ScrollArea className="flex-grow mb-4 pr-4" ref={scrollAreaRef}>

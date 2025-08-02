@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Save, Share2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
+import { useSavedContent } from '@/hooks/use-saved-content';
 
 export default function AssignmentCheckerTool() {
   const { user } = useAuth();
@@ -17,6 +19,7 @@ export default function AssignmentCheckerTool() {
   const [result, setResult] = useState<{ evaluation: string; suggestions: string } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { saveContent } = useSavedContent();
 
   const handleSubmit = async () => {
     if (!assignmentText.trim()) {
@@ -52,9 +55,22 @@ export default function AssignmentCheckerTool() {
     }
   };
 
-  const handleSaveToDrive = () => {
-    toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
-  }
+  const handleSave = () => {
+    if (!result) return;
+    const fullContent = `## Evaluation\n\n${result.evaluation}\n\n## Suggestions\n\n${result.suggestions}`;
+    const success = saveContent({
+      title: `Assignment Feedback: ${assignmentText.substring(0, 30)}...`,
+      tool: 'Assignment Checker',
+      content: fullContent,
+    });
+    toast({
+      title: success ? 'Feedback Saved!' : 'Failed to Save',
+      description: success
+        ? 'Your assignment feedback has been saved to the dashboard.'
+        : 'There was an issue saving your feedback.',
+      variant: success ? 'default' : 'destructive',
+    });
+  };
 
   const handleShare = () => {
     toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
@@ -134,7 +150,7 @@ export default function AssignmentCheckerTool() {
 
           <Card>
             <CardFooter className="gap-2 -m-6 p-6">
-                <Button variant="outline" onClick={handleSaveToDrive}>
+                <Button variant="outline" onClick={handleSave}>
                   <Save className="mr-2 h-4 w-4" /> Save Feedback
                 </Button>
                 <Button variant="outline" onClick={handleShare}>

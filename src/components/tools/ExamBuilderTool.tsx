@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { Save, Share2, UploadCloud, Image as ImageIcon, X } from 'lucide-react';
 import Image from 'next/image';
 import { Label } from '../ui/label';
 import { useAuth } from '@/hooks/use-auth';
+import { useSavedContent } from '@/hooks/use-saved-content';
 
 export default function ExamBuilderTool() {
   const { user } = useAuth();
@@ -18,6 +20,7 @@ export default function ExamBuilderTool() {
   const [examQuestions, setExamQuestions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { saveContent } = useSavedContent();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -84,13 +87,20 @@ export default function ExamBuilderTool() {
     }
   };
   
-  const handleSaveToDrive = () => {
-    toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
-  }
-  
-  const handleSaveToTerabox = () => {
-    toast({ title: "Coming Soon!", description: "TeraBox integration is under development." });
-  }
+  const handleSave = () => {
+    const success = saveContent({
+      title: `Exam Questions from Image`,
+      tool: 'Exam Builder',
+      content: examQuestions.join('\n\n'),
+    });
+    toast({
+      title: success ? 'Content Saved!' : 'Failed to Save',
+      description: success
+        ? 'Your exam questions have been saved to the dashboard.'
+        : 'There was an issue saving your content.',
+      variant: success ? 'default' : 'destructive',
+    });
+  };
 
   const handleShare = () => {
     toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
@@ -191,11 +201,8 @@ export default function ExamBuilderTool() {
             </ul>
           </CardContent>
           <CardFooter className="gap-2">
-            <Button variant="outline" onClick={handleSaveToDrive}>
-              <Save className="mr-2 h-4 w-4" /> Save to Google Drive
-            </Button>
-            <Button variant="outline" onClick={handleSaveToTerabox}>
-                <ImageIcon className="mr-2 h-4 w-4" /> Save Image to TeraBox
+            <Button variant="outline" onClick={handleSave}>
+              <Save className="mr-2 h-4 w-4" /> Save to Dashboard
             </Button>
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share

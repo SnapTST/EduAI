@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -12,6 +13,7 @@ import { Save, Share2, Copy, Orbit } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
 import { cn } from '@/lib/utils';
+import { useSavedContent } from '@/hooks/use-saved-content';
 
 function FlashcardViewer({ flashcards }: { flashcards: Flashcard[] }) {
   const [flippedStates, setFlippedStates] = useState<boolean[]>(Array(flashcards.length).fill(false));
@@ -67,6 +69,7 @@ export default function FlashcardMakerTool() {
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { saveContent } = useSavedContent();
 
   const handleSubmit = async () => {
     if (!studyMaterial.trim()) {
@@ -102,9 +105,25 @@ export default function FlashcardMakerTool() {
     }
   };
 
-  const handleSaveToDrive = () => {
-    toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
-  }
+  const handleSave = () => {
+    const flashcardsText = flashcards
+      .map(card => `Q: ${card.front}\nA: ${card.back}`)
+      .join('\n\n---\n\n');
+
+    const success = saveContent({
+      title: `Flashcards: ${studyMaterial.substring(0, 30)}...`,
+      tool: 'AI Flashcard Maker',
+      content: flashcardsText,
+    });
+
+    toast({
+      title: success ? 'Flashcards Saved!' : 'Failed to Save',
+      description: success
+        ? 'Your flashcards have been saved to the dashboard.'
+        : 'There was an issue saving your flashcards.',
+      variant: success ? 'default' : 'destructive',
+    });
+  };
 
   const handleShare = () => {
     toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
@@ -164,8 +183,8 @@ export default function FlashcardMakerTool() {
             <FlashcardViewer flashcards={flashcards} />
           </CardContent>
           <CardFooter className="gap-2">
-            <Button variant="outline" onClick={handleSaveToDrive}>
-              <Save className="mr-2 h-4 w-4" /> Save to Google Drive
+            <Button variant="outline" onClick={handleSave}>
+              <Save className="mr-2 h-4 w-4" /> Save to Dashboard
             </Button>
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share

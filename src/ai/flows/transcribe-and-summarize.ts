@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI agent for transcribing and summarizing audio.
@@ -34,8 +35,8 @@ const prompt = ai.definePrompt({
   input: {schema: TranscribeAndSummarizeInputSchema},
   output: {schema: TranscribeAndSummarizeOutputSchema},
   prompt: `You are an expert note-taker. Your task is to perform two actions on the provided audio file:
-1.  Transcribe the audio accurately.
-2.  Summarize the transcribed text into clear, structured notes.
+1.  First, provide the full and accurate transcription of the audio.
+2.  Second, create a concise summary of the transcribed text into clear, structured notes.
 
 Audio: {{media url=audioDataUri}}`,
 });

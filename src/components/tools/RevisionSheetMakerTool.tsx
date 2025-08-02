@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { LoadingSpinner } from '@/components/common/LoadingSpinner';
 import { Save, Share2 } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/hooks/use-auth';
+import { useSavedContent } from '@/hooks/use-saved-content';
 
 export default function RevisionSheetMakerTool() {
   const { user } = useAuth();
@@ -17,6 +19,7 @@ export default function RevisionSheetMakerTool() {
   const [revisionSheet, setRevisionSheet] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { saveContent } = useSavedContent();
 
   const handleSubmit = async () => {
     if (!content.trim()) {
@@ -52,9 +55,20 @@ export default function RevisionSheetMakerTool() {
     }
   };
 
-  const handleSaveToDrive = () => {
-    toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
-  }
+  const handleSave = () => {
+    const success = saveContent({
+      title: `Revision Sheet`,
+      tool: 'Revision Sheet Maker',
+      content: revisionSheet,
+    });
+    toast({
+      title: success ? 'Sheet Saved!' : 'Failed to Save',
+      description: success
+        ? 'Your revision sheet has been saved to the dashboard.'
+        : 'There was an issue saving your sheet.',
+      variant: success ? 'default' : 'destructive',
+    });
+  };
 
   const handleShare = () => {
     toast({ title: "Coming Soon!", description: "Sharing feature is under development." });
@@ -116,8 +130,8 @@ export default function RevisionSheetMakerTool() {
             </div>
           </CardContent>
           <CardFooter className="gap-2">
-            <Button variant="outline" onClick={handleSaveToDrive}>
-              <Save className="mr-2 h-4 w-4" /> Save to Google Drive
+            <Button variant="outline" onClick={handleSave}>
+              <Save className="mr-2 h-4 w-4" /> Save to Dashboard
             </Button>
             <Button variant="outline" onClick={handleShare}>
               <Share2 className="mr-2 h-4 w-4" /> Share

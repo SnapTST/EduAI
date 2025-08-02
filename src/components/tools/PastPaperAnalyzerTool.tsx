@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -10,6 +11,7 @@ import { Save, Share2, UploadCloud, Image as ImageIcon, X, Target } from 'lucide
 import Image from 'next/image';
 import { Label } from '../ui/label';
 import { useAuth } from '@/hooks/use-auth';
+import { useSavedContent } from '@/hooks/use-saved-content';
 
 export default function PastPaperAnalyzerTool() {
   const { user } = useAuth();
@@ -18,6 +20,7 @@ export default function PastPaperAnalyzerTool() {
   const [result, setResult] = useState<{ analysis: string; focusAreas: string[] } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { saveContent } = useSavedContent();
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -84,8 +87,21 @@ export default function PastPaperAnalyzerTool() {
     }
   };
 
-  const handleSaveToDrive = () => {
-    toast({ title: "Coming Soon!", description: "Google Drive integration is under development." });
+  const handleSave = () => {
+    if (!result) return;
+    const fullContent = `## Analysis\n\n${result.analysis}\n\n## Focus Areas\n\n${result.focusAreas.join('\n- ')}`;
+    const success = saveContent({
+      title: `Past Paper Analysis`,
+      tool: 'Past Paper Analyzer',
+      content: fullContent,
+    });
+    toast({
+      title: success ? 'Analysis Saved!' : 'Failed to Save',
+      description: success
+        ? 'Your paper analysis has been saved to the dashboard.'
+        : 'There was an issue saving your analysis.',
+      variant: success ? 'default' : 'destructive',
+    });
   };
 
   const handleShare = () => {
@@ -208,7 +224,7 @@ export default function PastPaperAnalyzerTool() {
 
           <Card>
             <CardFooter className="gap-2 -m-6 p-6">
-                <Button variant="outline" onClick={handleSaveToDrive}>
+                <Button variant="outline" onClick={handleSave}>
                   <Save className="mr-2 h-4 w-4" /> Save Analysis
                 </Button>
                 <Button variant="outline" onClick={handleShare}>
